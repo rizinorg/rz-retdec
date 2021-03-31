@@ -44,6 +44,9 @@ public:
 	static const Console::Command ShowUsedEnvironment;
 
 private:
+	/// Run decompilation for a command.
+	static RzAnnotatedCode *runDecompile(RzCore *core);
+
 	/// Implementation of pdz command.
 	static RzCmdStatus decompileCurrent(RzCore *core, int argc, const char **argv);
 

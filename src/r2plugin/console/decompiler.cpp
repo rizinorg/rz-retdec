@@ -99,13 +99,23 @@ bool DecompilerConsole::registerCommands(RzCmd* cmd)
 	return DecompilerConsole::console.registerConsole(cmd, root_desc, CMD_PREFIX);
 }
 
-RzCmdStatus DecompilerConsole::decompileCurrent(RzCore *core, int argc, const char **argv)
+RzAnnotatedCode *DecompilerConsole::runDecompile(RzCore *core)
 {
 	std::lock_guard<std::recursive_mutex> lock(mutex);
-	R2Database info(*core);
-	auto config = createConsoleConfig(info);
+	try {
+		R2Database info(*core);
+		auto config = createConsoleConfig(info);
+		auto [code, _] = decompile(config, true);
+		return code;
+	} catch (const std::exception& e) {
+		Log::error() << Log::Error << e.what() << std::endl;
+		return nullptr;
+	}
+}
 
-	auto [code, _] = decompile(config, true);
+RzCmdStatus DecompilerConsole::decompileCurrent(RzCore *core, int argc, const char **argv)
+{
+	auto code = runDecompile(core);
 	if (code == nullptr)
 		return RZ_CMD_STATUS_ERROR;
 
@@ -115,11 +125,7 @@ RzCmdStatus DecompilerConsole::decompileCurrent(RzCore *core, int argc, const ch
 
 RzCmdStatus DecompilerConsole::decompileWithOffsetsCurrent(RzCore *core, int argc, const char **argv)
 {
-	std::lock_guard<std::recursive_mutex> lock(mutex);
-	R2Database info(*core);
-	auto config = createConsoleConfig(info);
-
-	auto [code, _] = decompile(config, true);
+	auto code = runDecompile(core);
 	if (code == nullptr)
 		return RZ_CMD_STATUS_ERROR;
 
@@ -133,11 +139,7 @@ RzCmdStatus DecompilerConsole::decompileWithOffsetsCurrent(RzCore *core, int arg
 
 RzCmdStatus DecompilerConsole::decompileJsonCurrent(RzCore *core, int argc, const char **argv)
 {
-	std::lock_guard<std::recursive_mutex> lock(mutex);
-	R2Database info(*core);
-	auto config = createConsoleConfig(info);
-
-	auto [code, _] = decompile(config, true);
+	auto code = runDecompile(core);
 	if (code == nullptr)
 		return RZ_CMD_STATUS_ERROR;
 
@@ -147,11 +149,7 @@ RzCmdStatus DecompilerConsole::decompileJsonCurrent(RzCore *core, int argc, cons
 
 RzCmdStatus DecompilerConsole::decompileCommentCurrent(RzCore *core, int argc, const char **argv)
 {
-	std::lock_guard<std::recursive_mutex> lock(mutex);
-	R2Database info(*core);
-	auto config = createConsoleConfig(info);
-
-	auto [code, _] = decompile(config, true);
+	auto code = runDecompile(core);
 	if (code == nullptr)
 		return RZ_CMD_STATUS_ERROR;
 

@@ -7,8 +7,12 @@
 #include <iostream>
 #include <regex>
 
+#include <retdec/utils/io/log.h>
+
 #include "r2plugin/r2retdec.h"
 #include "r2plugin/console/data_analysis.h"
+
+using namespace retdec::utils::io;
 
 namespace retdec {
 namespace r2plugin {
@@ -133,17 +137,22 @@ RzCmdStatus DataAnalysisConsole::analyzeRange(RzCore *core, int argc, const char
 RzCmdStatus DataAnalysisConsole::analyzeWholeBinary(RzCore *core, int argc, const char **argv)
 {
 	std::lock_guard<std::recursive_mutex> lock(mutex);
-	R2Database info(*core);
-	auto config = createConfig(info, "whole");
+	try {
+		R2Database info(*core);
+		auto config = createConfig(info, "whole");
 
-	auto [code, _] = decompile(config, false);
-	if (code == nullptr)
+		auto [code, _] = decompile(config, false);
+		if (code == nullptr)
+			return RZ_CMD_STATUS_ERROR;
+
+		// r_core_annotated_code_print(code, nullptr);
+		info.setFunctions(config);
+
+		return RZ_CMD_STATUS_OK;
+	} catch (const std::exception& e) {
+		Log::error() << Log::Error << e.what() << std::endl;
 		return RZ_CMD_STATUS_ERROR;
-
-	// r_core_annotated_code_print(code, nullptr);
-	info.setFunctions(config);
-
-	return RZ_CMD_STATUS_OK;
+	}
 }
 
 }
