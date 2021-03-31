@@ -20,7 +20,7 @@ add_library(core_retdec SHARED ${SOURCES})
 set(CORE_LIBS
 	retdec::retdec
 	retdec::config
-	Radare2::libr
+	Rizin::librz
 )
 
 if (MSVC)
@@ -77,4 +77,4 @@ set_target_properties(core_retdec PROPERTIES
 
 set_property(GLOBAL PROPERTY R2RETDEC_CORE_LIBS ${CORE_LIBS})
 
-install(TARGETS core_retdec DESTINATION "${RADARE2_INSTALL_PLUGDIR}")
+install(TARGETS core_retdec DESTINATION "${RIZIN_INSTALL_PLUGDIR}")

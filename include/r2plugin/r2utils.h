@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-#include <r_core.h>
+#include <rz_core.h>
 
 namespace retdec {
 namespace r2plugin {

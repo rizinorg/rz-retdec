@@ -40,7 +40,7 @@ std::map<const std::string, const CallingConventionID> R2Database::_r2rdcc = {
 	{"watcom", CallingConventionID::CC_WATCOM}
 };
 
-R2Database::R2Database(RCore &core):
+R2Database::R2Database(RzCore &core):
 	_r2core(core)
 {
 }
@@ -55,10 +55,10 @@ std::string R2Database::fetchFilePath() const
 
 void R2Database::setFunction(const common::Function &fnc) const
 {
-	auto r2fnc = r_anal_get_function_at(_r2core.anal, fnc.getStart().getValue());
+	auto r2fnc = rz_analysis_get_function_at(_r2core.analysis, fnc.getStart().getValue());
 	if (r2fnc == nullptr) {
-		r2fnc = r_anal_create_function(_r2core.anal, fnc.getName().c_str(),
-				fnc.getStart().getValue(), R_ANAL_FCN_TYPE_FCN, nullptr);
+		r2fnc = rz_analysis_create_function(_r2core.analysis, fnc.getName().c_str(),
+				fnc.getStart().getValue(), RZ_ANALYSIS_FCN_TYPE_FCN, nullptr);
 		if (r2fnc == nullptr) {
 			throw DecompilationError("Unable to create function on address "
 					+ std::to_string(fnc.getStart().getValue()));
@@ -66,7 +66,7 @@ void R2Database::setFunction(const common::Function &fnc) const
 	}
 
 	if (!fnc.isDynamicallyLinked() && fnc.getSize().getValue() > 1)
-		if (!r_anal_fcn_add_bb(_r2core.anal, r2fnc, fnc.getStart().getValue(), fnc.getSize().getValue(), UT64_MAX, UT64_MAX, nullptr))
+		if (!rz_analysis_fcn_add_bb(_r2core.analysis, r2fnc, fnc.getStart().getValue(), fnc.getSize().getValue(), UT64_MAX, UT64_MAX, nullptr))
 			Log::error() << Log::Warning << "unable to add basic block of " << fnc.getName() << std::endl;
 
 	copyFunctionData(fnc, *r2fnc);
@@ -82,9 +82,9 @@ std::string sanitize(const std::string& a)
 	return ok.str();
 }
 
-void R2Database::copyFunctionData(const common::Function &fnc, RAnalFunction &r2fnc) const
+void R2Database::copyFunctionData(const common::Function &fnc, RzAnalysisFunction &r2fnc) const
 {
-	if (r_anal_function_rename(&r2fnc, fnc.getName().c_str()) == false) {
+	if (rz_analysis_function_rename(&r2fnc, fnc.getName().c_str()) == false) {
 		std::ostringstream err;
 		err << "unable to set rename function at offset "
 			<< std::hex << fnc.getStart() << ": new name \"" << fnc.getName();
@@ -97,7 +97,7 @@ void R2Database::copyFunctionData(const common::Function &fnc, RAnalFunction &r2
 	//     Sanitization will check for symbols that r2 cannot parse and replace them with
 	//     more appropriate symbols.
 	if (false && !fnc.getDeclarationString().empty()) {
-		r_anal_str_to_fcn(_r2core.anal, &r2fnc, (fnc.getDeclarationString()+";").c_str());
+		rz_analysis_str_to_fcn(_r2core.analysis, &r2fnc, (fnc.getDeclarationString()+";").c_str());
 	}
 	else {
 		std::ostringstream data;
@@ -113,7 +113,7 @@ void R2Database::copyFunctionData(const common::Function &fnc, RAnalFunction &r2
 				<< " " << a.getName();
 		}
 		data << ");";
-		r_anal_str_to_fcn(_r2core.anal, &r2fnc, sanitize(data.str()).c_str());
+		rz_analysis_str_to_fcn(_r2core.analysis, &r2fnc, sanitize(data.str()).c_str());
 	}
 
 }
@@ -132,7 +132,7 @@ void R2Database::setFunctions(const config::Config& config) const
  */
 Function R2Database::fetchFunction(ut64 addr) const
 {
-	RAnalFunction *cf = r_anal_get_fcn_in(_r2core.anal, addr, R_ANAL_FCN_TYPE_NULL);
+	RzAnalysisFunction *cf = rz_analysis_get_fcn_in(_r2core.analysis, addr, RZ_ANALYSIS_FCN_TYPE_NULL);
 	if (cf == nullptr) {
 		std::ostringstream errMsg;
 		errMsg << "no function at offset 0x" << std::hex << addr;
@@ -152,11 +152,11 @@ Function R2Database::fetchSeekedFunction() const
  */
 void R2Database::fetchFunctionsAndGlobals(Config &rconfig) const
 {
-	auto list = r_anal_get_fcns(_r2core.anal);
+	auto list = rz_analysis_get_fcns(_r2core.analysis);
 	if (list != nullptr) {
 		FunctionContainer functions;
-		for (RListIter *it = list->head; it; it = it->n) {
-			auto fnc = reinterpret_cast<RAnalFunction*>(it->data);
+		for (RzListIter *it = list->head; it; it = it->n) {
+			auto fnc = reinterpret_cast<RzAnalysisFunction*>(it->data);
 			if (fnc == nullptr)
 				continue;
 			functions.insert(convertFunctionObject(*fnc));
@@ -189,7 +189,7 @@ void R2Database::fetchFunctionsAndGlobals(Config &rconfig) const
  */
 void R2Database::fetchGlobals(Config &config) const
 {
-	RBinObject *obj = r_bin_cur_object(_r2core.bin);
+	RzBinObject *obj = rz_bin_cur_object(_r2core.bin);
 	if (obj == nullptr || obj->symbols == nullptr)
 		return;
 
@@ -197,8 +197,8 @@ void R2Database::fetchGlobals(Config &config) const
 	GlobalVarContainer globals;
 
 	FunctionContainer functions;
-	for (RListIter *it = list->head; it; it = it->n) {
-		auto sym = reinterpret_cast<RBinSymbol*>(it->data);
+	for (RzListIter *it = list->head; it; it = it->n) {
+		auto sym = reinterpret_cast<RzBinSymbol*>(it->data);
 		if (sym == nullptr)
 			continue;
 
@@ -235,7 +235,7 @@ void R2Database::fetchGlobals(Config &config) const
 				continue;
 			}
 			// Flags will contain custom name set by user.
-			RFlagItem* flag = r_flag_get_i(_r2core.flags, sym->vaddr);
+			RzFlagItem* flag = rz_flag_get_i(_r2core.flags, sym->vaddr);
 			if (flag) {
 				name = flag->name;
 			}
@@ -262,10 +262,10 @@ void R2Database::fetchGlobals(Config &config) const
  * Converts function object from its representation in Radare2 into
  * represnetation that is used in RetDec.
  */
-Function R2Database::convertFunctionObject(RAnalFunction &r2fnc) const
+Function R2Database::convertFunctionObject(RzAnalysisFunction &r2fnc) const
 {
-	auto start = r_anal_function_min_addr(&r2fnc);
-	auto end = r_anal_function_max_addr(&r2fnc);
+	auto start = rz_analysis_function_min_addr(&r2fnc);
+	auto end = rz_analysis_function_max_addr(&r2fnc);
 
 	auto name = fu::stripName(r2fnc.name);
 
@@ -291,26 +291,26 @@ Function R2Database::convertFunctionObject(RAnalFunction &r2fnc) const
  * This is not, however, projected into function's calling convention and the args are needed to
  * be fetched with stack variables of the funciton.
  */
-void R2Database::fetchFunctionLocalsAndArgs(Function &function, RAnalFunction &r2fnc) const
+void R2Database::fetchFunctionLocalsAndArgs(Function &function, RzAnalysisFunction &r2fnc) const
 {
 	ObjectSetContainer locals;
 	ObjectSequentialContainer r2args, r2userArgs;
 
-	auto list = r_anal_var_all_list(_r2core.anal, &r2fnc);
+	auto list = rz_analysis_var_all_list(_r2core.analysis, &r2fnc);
 	if (list != nullptr) {
-		for (RListIter *it = list->head; it; it = it->n) {
-			auto locvar = reinterpret_cast<RAnalVar*>(it->data);
+		for (RzListIter *it = list->head; it; it = it->n) {
+			auto locvar = reinterpret_cast<RzAnalysisVar*>(it->data);
 			if (locvar == nullptr)
 				continue;
 
 			Storage variableStorage;
 			switch (locvar->kind) {
-			case R_ANAL_VAR_KIND_REG: {
+			case RZ_ANALYSIS_VAR_KIND_REG: {
 				variableStorage = Storage::inRegister(locvar->regname);
 			}
 			break;
-			case R_ANAL_VAR_KIND_SPV:
-			case R_ANAL_VAR_KIND_BPV: {
+			case RZ_ANALYSIS_VAR_KIND_SPV:
+			case RZ_ANALYSIS_VAR_KIND_BPV: {
 				int stackOffset = locvar->delta;
 				// Execute extra pop to match RetDec offset base.
 				// extra POP x86: 8 -> 4 (x64: 8 -> 0)
@@ -345,32 +345,32 @@ void R2Database::fetchFunctionLocalsAndArgs(Function &function, RAnalFunction &r
 /**
  * @brief Fetches function arguments defined by user.
  */
-void R2Database::fetchExtraArgsData(ObjectSequentialContainer &args, RAnalFunction &r2fnc) const
+void R2Database::fetchExtraArgsData(ObjectSequentialContainer &args, RzAnalysisFunction &r2fnc) const
 {
-	RAnalFuncArg *arg;
+	RzAnalysisFuncArg *arg;
 
-	char* key = resolve_fcn_name(_r2core.anal, r2fnc.name);
-	if (!key || !_r2core.anal|| !_r2core.anal->sdb_types)
+	char* key = resolve_fcn_name(_r2core.analysis, r2fnc.name);
+	if (!key || !_r2core.analysis || !_r2core.analysis->sdb_types)
 		return;
 
-	int nargs = r_type_func_args_count(_r2core.anal->sdb_types, key);
+	int nargs = rz_type_func_args_count(_r2core.analysis->sdb_types, key);
 	if (nargs) {
-		RList *list = r_core_get_func_args(&_r2core, r2fnc.name);
-		for (RListIter *it = list->head; it; it = it->n) {
-			arg = reinterpret_cast<RAnalFuncArg*>(it->data);
+		RzList *list = rz_core_get_func_args(&_r2core, r2fnc.name);
+		for (RzListIter *it = list->head; it; it = it->n) {
+			arg = reinterpret_cast<RzAnalysisFuncArg*>(it->data);
 			Object var(arg->name, Storage::undefined());
 			var.setRealName(arg->name);
 			var.type = Type(fu::convertTypeToLlvm(arg->orig_c_type));
 			args.push_back(var);
 		}
-		r_list_free (list);
+		rz_list_free (list);
 	}
 }
 
 /**
  * @brief Fetches the calling convention of the input function from Radare2.
  */
-void R2Database::fetchFunctionCallingconvention(Function &function, RAnalFunction &r2fnc) const
+void R2Database::fetchFunctionCallingconvention(Function &function, RzAnalysisFunction &r2fnc) const
 {
 	if (r2fnc.cc != nullptr) {
 		if (_r2rdcc.count(r2fnc.cc)) {
@@ -385,15 +385,15 @@ void R2Database::fetchFunctionCallingconvention(Function &function, RAnalFunctio
 /**
  * @brief Fetches the return type of the input function from Radare2.
  */
-void R2Database::fetchFunctionReturnType(Function &function, RAnalFunction &r2fnc) const
+void R2Database::fetchFunctionReturnType(Function &function, RzAnalysisFunction &r2fnc) const
 {
 	function.returnType = Type("void");
-	char* key = resolve_fcn_name(_r2core.anal, r2fnc.name);
+	char* key = resolve_fcn_name(_r2core.analysis, r2fnc.name);
 
-	if (!key || !_r2core.anal || !_r2core.anal->sdb_types)
+	if (!key || !_r2core.analysis || !_r2core.analysis->sdb_types)
 		return;
 
-	if (auto returnType = r_type_func_ret(_r2core.anal->sdb_types, key))
+	if (auto returnType = rz_type_func_ret(_r2core.analysis->sdb_types, key))
 		function.returnType = Type(fu::convertTypeToLlvm(returnType));
 }
 
@@ -402,7 +402,7 @@ void R2Database::fetchFunctionReturnType(Function &function, RAnalFunction &r2fn
  */
 size_t R2Database::fetchWordSize() const
 {
-	return r_config_get_i(_r2core.config, "asm.bits");
+	return rz_config_get_i(_r2core.config, "asm.bits");
 }
 
 ut64 R2Database::seekedAddress() const
@@ -410,7 +410,7 @@ ut64 R2Database::seekedAddress() const
 	return _r2core.offset;
 }
 
-const RCore& R2Database::core() const
+const RzCore& R2Database::core() const
 {
 	return _r2core;
 }

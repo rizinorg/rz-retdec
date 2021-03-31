@@ -11,8 +11,8 @@
 #include <map>
 #include <string>
 
-#include <r_core.h>
-#include <r_anal.h>
+#include <rz_core.h>
+#include <rz_analysis.h>
 
 #include <retdec/config/config.h>
 
@@ -26,13 +26,13 @@ using R2Address = ut64;
  */
 class R2Database {
 public:
-	R2Database(RCore &core);
+	R2Database(RzCore &core);
 
 public:
 	std::string fetchFilePath() const;
 
 	void setFunction(const common::Function &fnc) const;
-	void copyFunctionData(const common::Function &fnc, RAnalFunction& r2fnc) const;
+	void copyFunctionData(const common::Function &fnc, RzAnalysisFunction& r2fnc) const;
 
 	void setFunctions(const config::Config &rdconfig) const;
 
@@ -41,20 +41,20 @@ public:
 
 	void fetchFunctionsAndGlobals(config::Config &rdconfig) const;
 
-	void fetchFunctionLocalsAndArgs(common::Function &function, RAnalFunction &r2fnc) const;
-	void fetchFunctionCallingconvention(common::Function &function, RAnalFunction &r2fnc) const;
-	void fetchFunctionReturnType(common::Function &function, RAnalFunction &r2fnc) const;
+	void fetchFunctionLocalsAndArgs(common::Function &function, RzAnalysisFunction &r2fnc) const;
+	void fetchFunctionCallingconvention(common::Function &function, RzAnalysisFunction &r2fnc) const;
+	void fetchFunctionReturnType(common::Function &function, RzAnalysisFunction &r2fnc) const;
 	size_t fetchWordSize() const;
 	R2Address seekedAddress() const;
-	const RCore& core() const;
+	const RzCore& core() const;
 
 protected:
 	void fetchGlobals(config::Config &rdconfig) const;
-	common::Function convertFunctionObject(RAnalFunction &fnc) const;
-	void fetchExtraArgsData(common::ObjectSequentialContainer &args, RAnalFunction &r2fnc) const;
+	common::Function convertFunctionObject(RzAnalysisFunction &fnc) const;
+	void fetchExtraArgsData(common::ObjectSequentialContainer &args, RzAnalysisFunction &r2fnc) const;
 
 private:
-	RCore &_r2core;
+	RzCore &_r2core;
 	static std::map<const std::string, const common::CallingConventionID> _r2rdcc;
 };
 

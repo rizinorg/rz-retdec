@@ -7,7 +7,7 @@
 #include <mutex>
 
 #include <retdec/utils/io/log.h>
-#include <r_core.h>
+#include <rz_core.h>
 
 #include "r2plugin/r2data.h"
 #include "r2plugin/console/decompiler.h"
@@ -28,7 +28,7 @@ using namespace retdec::utils::io;
 static int r2retdec_cmd(void *user, const char* input)
 {
 	static std::mutex mutex;
-	RCore& core = *(RCore*)user;
+	RzCore& core = *(RzCore*)user;
 	R2Database binInfo(core);
 
 	try {
@@ -42,13 +42,13 @@ static int r2retdec_cmd(void *user, const char* input)
 }
 
 // Structure containing plugin info.
-RCorePlugin r_core_plugin_retdec = {
+RzCorePlugin rz_core_plugin_retdec = {
 	/* .name = */ "r2retdec",
 	/* .desc = */ "RetDec integration",
 	/* .license = */ "MIT",
 	/* .author = */ "Avast",
 	/* .version = */ "0.2",
-	/* .call = */ r2retdec_cmd,
+// TODO	/* .call = */ r2retdec_cmd,
 	/* .init = */ nullptr,
 	/* .fini = */ nullptr
 };
@@ -59,10 +59,10 @@ extern "C"
 #endif
 
 // This will register the r2plugin in r2 console.
-R_API RLibStruct radare_plugin = {
-	/* .type = */ R_LIB_TYPE_CORE,
-	/* .data = */ &r_core_plugin_retdec,
-	/* .version = */ R2_VERSION,
+RZ_API RzLibStruct rizin_plugin = {
+	/* .type = */ RZ_LIB_TYPE_CORE,
+	/* .data = */ &rz_core_plugin_retdec,
+	/* .version = */ RZ_VERSION,
 	/* .free = */ nullptr,
 	/* .pkgname */ "retdec-r2plugin"
 };

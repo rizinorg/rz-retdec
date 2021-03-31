@@ -5,7 +5,7 @@
 #include <iterator>
 #include <mutex>
 
-#include <r_core.h>
+#include <rz_core.h>
 #include <retdec/retdec/retdec.h>
 #include <retdec/utils/binary_path.h>
 #include <retdec/utils/io/log.h>
@@ -177,8 +177,8 @@ void createConfigHashFile(const retdec::config::Config& config)
  */
 retdec::config::Config loadDefaultConfig()
 {
-	// Perhaps support signatures are installed in R2_HOME_PLUGDIR?
-	auto plugdir = r_str_home(R2_HOME_PLUGINS);
+	// Perhaps support signatures are installed in RZ_HOME_PLUGDIR?
+	auto plugdir = rz_str_home(RZ_HOME_PLUGINS);
 
 	// Loads configuration from file - also contains default config.
 	auto rdConf = retdec::config::Config::fromJsonString(DefaultConfigJSON);
@@ -227,7 +227,7 @@ config::Config createConfig(const R2Database& binInfo, const std::string& cacheS
 	return config;
 }
 
-std::pair<RAnnotatedCode*, retdec::config::Config> decompile(
+std::pair<RzAnnotatedCode*, retdec::config::Config> decompile(
 		config::Config& config,
 		bool useCache)
 {
@@ -278,9 +278,9 @@ std::pair<RAnnotatedCode*, retdec::config::Config> decompile(
 }
 
 /**
- * This function is to get RAnnotatedCode to pass it to Cutter's decompiler widget.
+ * This function is to get RzAnnotatedCode to pass it to Cutter's decompiler widget.
  */
-R_API RAnnotatedCode* decompile(RCore *core, ut64 addr){
+RZ_API RzAnnotatedCode* decompile(RzCore *core, ut64 addr){
 	static std::mutex mutex;
 	std::lock_guard<std::mutex> lock (mutex);
 

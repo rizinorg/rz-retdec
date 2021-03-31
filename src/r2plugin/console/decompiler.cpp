@@ -88,7 +88,7 @@ bool DecompilerConsole::decompileCurrent(const std::string&, const R2Database& b
 	if (code == nullptr)
 		return false;
 
-	r_core_annotated_code_print(code, nullptr);
+	rz_core_annotated_code_print(code, nullptr);
 	return true;
 }
 
@@ -100,9 +100,9 @@ bool DecompilerConsole::decompileWithOffsetsCurrent(const std::string&, const R2
 	if (code == nullptr)
 		return false;
 
-	RVector *offsets = r_annotated_code_line_offsets(code);
-	r_core_annotated_code_print(code, offsets);
-	r_vector_free(offsets);
+	RzVector *offsets = rz_annotated_code_line_offsets(code);
+	rz_core_annotated_code_print(code, offsets);
+	rz_vector_free(offsets);
 
 	return true;
 }
@@ -116,7 +116,7 @@ bool DecompilerConsole::decompileJsonCurrent(const std::string&, const R2Databas
 	if (code == nullptr)
 		return false;
 
-	r_core_annotated_code_print_json(code);
+	rz_core_annotated_code_print_json(code);
 	return true;
 }
 
@@ -128,7 +128,7 @@ bool DecompilerConsole::decompileCommentCurrent(const std::string&, const R2Data
 	if (code == nullptr)
 		return false;
 
-	r_core_annotated_code_print_comment_cmds(code);
+	rz_core_annotated_code_print_comment_cmds(code);
 	return true;
 }
 

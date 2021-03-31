@@ -42,7 +42,7 @@ protected:
 
 public:
 	bool handle(const std::string& commad, const R2Database& info);
-	bool printHelp(const RCore& core) const;
+	bool printHelp(const RzCore& core) const;
 
 private:
 	const std::string _base;

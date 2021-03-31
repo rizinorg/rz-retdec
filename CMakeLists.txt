@@ -62,14 +62,14 @@ if (R2PLUGIN_DOC)
 	add_subdirectory(doc)
 endif()
 
-get_filename_component(RADARE_INSTALL_PATH "${RADARE_INSTALL_PATH}" REALPATH BASE_DIR "${CMAKE_BINARY_DIR}")
+get_filename_component(RIZIN_INSTALL_PATH "${RIZIN_INSTALL_PATH}" REALPATH BASE_DIR "${CMAKE_BINARY_DIR}")
 
-set(RADARE2_INSTALL_PLUGDIR "share/radare2/plugins" CACHE PATH "Directory to install radare2 plugin into")
-set(CUTTER_INSTALL_PLUGDIR "share/RadareOrg/Cutter/plugins/native" CACHE PATH "Directory to install Cutter plugin into")
+set(RIZIN_INSTALL_PLUGDIR "share/rizin/plugins" CACHE PATH "Directory to install rizin plugin into")
+set(CUTTER_INSTALL_PLUGDIR "share/rizin/cutter/plugins/native" CACHE PATH "Directory to install Cutter plugin into")
 
 if (RETDEC_INSTALL_PREFIX)
-	if (NOT IS_ABSOLUTE "${RADARE2_INSTALL_PLUGDIR}")
-		set(RADARE2_INSTALL_PLUGDIR "${CMAKE_INSTALL_PREFIX}/${RADARE2_INSTALL_PLUGDIR}")
+	if (NOT IS_ABSOLUTE "${RIZIN_INSTALL_PLUGDIR}")
+		set(RIZIN_INSTALL_PLUGDIR "${CMAKE_INSTALL_PREFIX}/${RIZIN_INSTALL_PLUGDIR}")
 	endif()
 
 	if (NOT IS_ABSOLUTE "${CUTTER_INSTALL_PLUGDIR}")
@@ -83,12 +83,12 @@ if (RETDEC_INSTALL_PREFIX)
 	endif()
 endif()
 
-option(BUILD_CUTTER_PLUGIN "Build r2retdec plugin for Cutter" OFF)
-option(BUILD_BUNDLED_RETDEC "Build retdec with the r2retdec plugin" ON)
+option(BUILD_CUTTER_PLUGIN "Build rz-retdec plugin for Cutter" OFF)
+option(BUILD_BUNDLED_RETDEC "Build retdec with the rz-retdec plugin" ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-find_package(Radare2 REQUIRED)
+find_package(Rizin REQUIRED)
 
 add_subdirectory(deps)
 add_subdirectory(src)

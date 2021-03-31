@@ -11,17 +11,17 @@
 #include <optional>
 #include <rapidjson/document.h>
 
-#include <r_util/r_annotated_code.h>
+#include <rz_util/rz_annotated_code.h>
 
 namespace retdec {
 namespace r2plugin {
 
 class R2CGenerator {
 public:
-	RAnnotatedCode* generateOutput(const std::string &rdoutJson) const;
+	RzAnnotatedCode* generateOutput(const std::string &rdoutJson) const;
 
 protected:
-	RAnnotatedCode* provideAnnotations(const rapidjson::Document &root) const;
+	RzAnnotatedCode* provideAnnotations(const rapidjson::Document &root) const;
 	std::optional<RSyntaxHighlightType> highlightTypeForToken(const std::string &token) const;
 
 private:

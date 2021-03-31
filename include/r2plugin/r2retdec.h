@@ -7,8 +7,8 @@
 #ifndef R2PLUGIN_R2RETDEC_H
 #define R2PLUGIN_R2RETDEC_H
 
-#include <r_util/r_annotated_code.h>
-#include <r_core.h>
+#include <rz_util/rz_annotated_code.h>
+#include <rz_core.h>
 
 #include "r2plugin/r2data.h"
 #include "filesystem_wrapper.h"
@@ -16,15 +16,15 @@
 namespace retdec {
 namespace r2plugin {
 
-R_API RAnnotatedCode* decompile(RCore *core, ut64 addr);
+RZ_API RzAnnotatedCode* decompile(RzCore *core, ut64 addr);
 
-std::pair<RAnnotatedCode*, retdec::config::Config> decompile(
+std::pair<RzAnnotatedCode*, retdec::config::Config> decompile(
 		const R2Database &binInfo,
 		const common::AddressRange& decompileRange,
 		bool useCache = true,
 		bool fetchR2Data = true);
 
-std::pair<RAnnotatedCode*, retdec::config::Config> decompile(
+std::pair<RzAnnotatedCode*, retdec::config::Config> decompile(
 		config::Config& config,
 		bool useCache);
 

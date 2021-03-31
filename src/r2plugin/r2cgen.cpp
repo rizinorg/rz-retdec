@@ -21,23 +21,23 @@ std::map<const std::string, RSyntaxHighlightType> R2CGenerator::_hig2token = {
 	// {"ws", ... }
 	// {"punc", ... }
 	// {"op", ... }
-	{"i_var", R_SYNTAX_HIGHLIGHT_TYPE_GLOBAL_VARIABLE},
-	// {"i_var", R_SYNTAX_HIGHLIGHT_TYPE_LOCAL_VARIABLE},
-	// {"i_mem", R_SYNTAX_HIGHLIGHT_TYPE_DATATYPE},
-	{"i_lab", R_SYNTAX_HIGHLIGHT_TYPE_KEYWORD},
-	{"i_fnc", R_SYNTAX_HIGHLIGHT_TYPE_FUNCTION_NAME},
-	{"i_arg", R_SYNTAX_HIGHLIGHT_TYPE_FUNCTION_PARAMETER},
-	{"keyw" , R_SYNTAX_HIGHLIGHT_TYPE_KEYWORD},
-	{"type" , R_SYNTAX_HIGHLIGHT_TYPE_DATATYPE},
-	{"preproc" , R_SYNTAX_HIGHLIGHT_TYPE_KEYWORD},
-	{"inc", R_SYNTAX_HIGHLIGHT_TYPE_COMMENT},
-	{"l_bool", R_SYNTAX_HIGHLIGHT_TYPE_CONSTANT_VARIABLE},
-	{"l_int", R_SYNTAX_HIGHLIGHT_TYPE_CONSTANT_VARIABLE},
-	{"l_fp", R_SYNTAX_HIGHLIGHT_TYPE_CONSTANT_VARIABLE},
-	{"l_str", R_SYNTAX_HIGHLIGHT_TYPE_CONSTANT_VARIABLE},
-	{"l_sym", R_SYNTAX_HIGHLIGHT_TYPE_CONSTANT_VARIABLE},
-	{"l_ptr", R_SYNTAX_HIGHLIGHT_TYPE_CONSTANT_VARIABLE},
-	{"cmnt" , R_SYNTAX_HIGHLIGHT_TYPE_COMMENT}
+	{"i_var", RZ_SYNTAX_HIGHLIGHT_TYPE_GLOBAL_VARIABLE},
+	// {"i_var", RZ_SYNTAX_HIGHLIGHT_TYPE_LOCAL_VARIABLE},
+	// {"i_mem", RZ_SYNTAX_HIGHLIGHT_TYPE_DATATYPE},
+	{"i_lab", RZ_SYNTAX_HIGHLIGHT_TYPE_KEYWORD},
+	{"i_fnc", RZ_SYNTAX_HIGHLIGHT_TYPE_FUNCTION_NAME},
+	{"i_arg", RZ_SYNTAX_HIGHLIGHT_TYPE_FUNCTION_PARAMETER},
+	{"keyw" , RZ_SYNTAX_HIGHLIGHT_TYPE_KEYWORD},
+	{"type" , RZ_SYNTAX_HIGHLIGHT_TYPE_DATATYPE},
+	{"preproc" , RZ_SYNTAX_HIGHLIGHT_TYPE_KEYWORD},
+	{"inc", RZ_SYNTAX_HIGHLIGHT_TYPE_COMMENT},
+	{"l_bool", RZ_SYNTAX_HIGHLIGHT_TYPE_CONSTANT_VARIABLE},
+	{"l_int", RZ_SYNTAX_HIGHLIGHT_TYPE_CONSTANT_VARIABLE},
+	{"l_fp", RZ_SYNTAX_HIGHLIGHT_TYPE_CONSTANT_VARIABLE},
+	{"l_str", RZ_SYNTAX_HIGHLIGHT_TYPE_CONSTANT_VARIABLE},
+	{"l_sym", RZ_SYNTAX_HIGHLIGHT_TYPE_CONSTANT_VARIABLE},
+	{"l_ptr", RZ_SYNTAX_HIGHLIGHT_TYPE_CONSTANT_VARIABLE},
+	{"cmnt" , RZ_SYNTAX_HIGHLIGHT_TYPE_COMMENT}
 };
 
 /**
@@ -58,9 +58,9 @@ std::optional<RSyntaxHighlightType> R2CGenerator::highlightTypeForToken(const st
  *
  * @param root The root of JSON decompilation output.
  */
-RAnnotatedCode* R2CGenerator::provideAnnotations(const rapidjson::Document &root) const
+RzAnnotatedCode* R2CGenerator::provideAnnotations(const rapidjson::Document &root) const
 {
-	RAnnotatedCode *code = r_annotated_code_new(nullptr);
+	RzAnnotatedCode *code = rz_annotated_code_new(nullptr);
 	if (code == nullptr) {
 		throw DecompilationError("unable to allocate memory");
 	}
@@ -94,22 +94,22 @@ RAnnotatedCode* R2CGenerator::provideAnnotations(const rapidjson::Document &root
 			unsigned long epos = planecode.tellp();
 
 			if (lastAddr.has_value()) {
-				RCodeAnnotation annotation = {};
-				annotation.type = R_CODE_ANNOTATION_TYPE_OFFSET;
+				RzCodeAnnotation annotation = {};
+				annotation.type = RZ_CODE_ANNOTATION_TYPE_OFFSET;
 				annotation.offset.offset = lastAddr.value();
 				annotation.start = bpos;
 				annotation.end = epos;
-				r_annotated_code_add_annotation(code, &annotation);
+				rz_annotated_code_add_annotation(code, &annotation);
 			}
 
 			auto higlight = highlightTypeForToken(token["kind"].GetString());
 			if (higlight.has_value()) {
-				RCodeAnnotation annotation = {};
-				annotation.type = R_CODE_ANNOTATION_TYPE_SYNTAX_HIGHLIGHT;
+				RzCodeAnnotation annotation = {};
+				annotation.type = RZ_CODE_ANNOTATION_TYPE_SYNTAX_HIGHLIGHT;
 				annotation.syntax_highlight.type = higlight.value();
 				annotation.start = bpos;
 				annotation.end = epos;
-				r_annotated_code_add_annotation(code, &annotation);
+				rz_annotated_code_add_annotation(code, &annotation);
 			}
 		}
 		else {
@@ -118,9 +118,9 @@ RAnnotatedCode* R2CGenerator::provideAnnotations(const rapidjson::Document &root
 	}
 
 	std::string str = planecode.str();
-	code->code = reinterpret_cast<char *>(r_malloc(str.length() + 1));
+	code->code = reinterpret_cast<char *>(rz_malloc(str.length() + 1));
 	if(!code->code) {
-		r_annotated_code_free(code);
+		rz_annotated_code_free(code);
 		throw DecompilationError("unable to allocate memory");
 	}
 	memcpy(code->code, str.c_str(), str.length());
@@ -132,7 +132,7 @@ RAnnotatedCode* R2CGenerator::provideAnnotations(const rapidjson::Document &root
 /**
  * Generates output by parsing RetDec's JSON output and calling R2CGenerator::provideAnnotations.
  */
-RAnnotatedCode* R2CGenerator::generateOutput(const std::string &rdoutJson) const
+RzAnnotatedCode* R2CGenerator::generateOutput(const std::string &rdoutJson) const
 {
 	std::ifstream jsonFile(rdoutJson, std::ios::in | std::ios::binary);
 	if (!jsonFile) {

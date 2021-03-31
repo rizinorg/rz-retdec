@@ -46,7 +46,7 @@ bool Console::handle(const std::string& cmd, const R2Database& info)
 	return true;
 }
 
-bool Console::printHelp(const RCore& core) const
+bool Console::printHelp(const RzCore& core) const
 {
 	std::vector<std::string> help;
 	help.push_back("Usage: "+_base);
@@ -70,7 +70,7 @@ bool Console::printHelp(const RCore& core) const
 
 	helpRaw.push_back(nullptr);
 
-	r_cons_cmd_help(helpRaw.data(), core.print->flags & R_PRINT_FLAGS_COLOR);
+	rz_cons_cmd_help(helpRaw.data(), core.print->flags & RZ_PRINT_FLAGS_COLOR);
 	return true;
 }
 
