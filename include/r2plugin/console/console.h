@@ -24,30 +24,44 @@ namespace r2plugin {
  */
 class Console {
 public:
-	/// Callback funuction that can be registered to handle command.
-	typedef bool (*Callback)(const std::string&, const R2Database&);
-
-	/// Command is represented as suffix and callback for that suffix.
-	struct Command {
-		std::string help = "";
-		Callback execute = nullptr;
-		bool extra = false;
-		std::string parameters = "";
+	/// Abstract Command or Command Group Description that can be registered into RzCmd.
+	class CommandDesc {
+	public:
+		virtual bool registerDesc(RzCmd* cmd, RzCmdDesc* parent, const std::string& prefix) const =0;
 	};
 
-	using NamedCommand = std::pair<const std::string, const Command&>;
+	/// Concrete Command that has no subcommands.
+	class Command : public CommandDesc {
+	public:
+		const RzCmdDescHelp help;
+		const RzCmdArgvCb cb;
+
+		Command(const RzCmdDescHelp help, const RzCmdArgvCb cb)
+			: help(help), cb(cb) {}
+		bool registerDesc(RzCmd* cmd, RzCmdDesc* parent, const std::string& prefix) const override;
+	};
+
+	/// Concrete Command Group that contains the Commands of its contained console.
+	struct CommandGroup : public CommandDesc {
+		const Console const* subconsole;
+	public:
+		CommandGroup(const Console const* subconsole)
+			: subconsole(subconsole) {}
+		bool registerDesc(RzCmd* cmd, RzCmdDesc* parent, const std::string& prefix) const override;
+	};
+
+	using NamedCommandDesc = std::pair<const std::string, const CommandDesc&>;
 
 protected:
-	Console(const std::string& base, const std::string& about, const std::vector<NamedCommand>&);
+	Console(const RzCmdDescHelp& help, const Command& root_cmd, const std::vector<NamedCommandDesc>&);
 
 public:
-	bool handle(const std::string& commad, const R2Database& info);
-	bool printHelp(const RzCore& core) const;
+	bool registerConsole(RzCmd* cmd, RzCmdDesc* parent, const std::string& prefix) const;
 
 private:
-	const std::string _base;
-	const std::string _about;
-	std::map<const std::string, const Command&> _callbacks;
+	const RzCmdDescHelp _help;
+	const Command _root_cmd;
+	std::map<const std::string, const CommandDesc&> _callbacks;
 };
 
 }

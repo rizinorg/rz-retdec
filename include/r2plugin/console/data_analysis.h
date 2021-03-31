@@ -30,12 +30,14 @@ public:
 	/// Representation of pdzaa command.
 	static Console::Command AnalyzeWholeBinary;
 
+	static const Console *getInstance() { return &console; }
+
 private:
 	/// Implementation of pdza command.
-	static bool analyzeRange(const std::string&, const R2Database& info);
+	static RzCmdStatus analyzeRange(RzCore *core, int argc, const char **argv);
 
 	/// Implementation of pdzaa command.
-	static bool analyzeWholeBinary(const std::string&, const R2Database& info);
+	static RzCmdStatus analyzeWholeBinary(RzCore *core, int argc, const char **argv);
 
 private:
 	/// Helper method. Parses arguments of pdza commnad.

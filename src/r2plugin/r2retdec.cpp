@@ -27,6 +27,8 @@ using namespace retdec::utils::io;
 namespace retdec {
 namespace r2plugin {
 
+std::recursive_mutex mutex;
+
 /**
  * Fetches the directory for output to be saved to.
  *
@@ -281,8 +283,7 @@ std::pair<RzAnnotatedCode*, retdec::config::Config> decompile(
  * This function is to get RzAnnotatedCode to pass it to Cutter's decompiler widget.
  */
 RZ_API RzAnnotatedCode* decompile(RzCore *core, ut64 addr){
-	static std::mutex mutex;
-	std::lock_guard<std::mutex> lock (mutex);
+	std::lock_guard<std::recursive_mutex> lock(mutex);
 
 	R2Database binInfo(*core);
 

@@ -13,35 +13,42 @@
 namespace retdec {
 namespace r2plugin {
 
-DataAnalysisConsole DataAnalysisConsole::console;
+static const RzCmdDescArg args_none[] = {{}};
 
-Console::Command DataAnalysisConsole::AnalyzeRange{
-	"Analyze and import functions at specified range. "
-	"Defualt range is range of currently seeked function.",
-	analyzeRange,
-	false,
-	"[start-end]"
-};
+#define with(T, ...) ([]{ T ${}; __VA_ARGS__; return $; }())
 
-Console::Command DataAnalysisConsole::AnalyzeWholeBinary{
-	"Analyze and import all functions.",
+Console::Command DataAnalysisConsole::AnalyzeRange(
+	with(RzCmdDescHelp,
+		$.summary =
+			"Analyze and import functions at specified range. "
+			"Default range is range of currently seeked function.";
+		$.args = args_none // TODO: "[start-end]"
+	),
+	analyzeRange
+);
+
+Console::Command DataAnalysisConsole::AnalyzeWholeBinary(
+	with(RzCmdDescHelp,
+		$.summary = "Analyze and import all functions.";
+		$.args = args_none
+	),
 	analyzeWholeBinary
-};
+);
 
 DataAnalysisConsole::DataAnalysisConsole(): Console(
-	"pdza",
-	"Run RetDec analysis.",
+	with(RzCmdDescHelp,
+		$.summary = "Run RetDec analysis.";
+		$.args = args_none
+	),
+	AnalyzeRange,
 	{
-		{"", AnalyzeRange},
 		{"a", AnalyzeWholeBinary}
 	})
 {
 }
 
-bool DataAnalysisConsole::handleCommand(const std::string& command, const R2Database& info)
-{
-	return DataAnalysisConsole::console.handle(command, info);
-}
+// this must be down here to be initialized after its commands.
+DataAnalysisConsole DataAnalysisConsole::console;
 
 common::AddressRange DataAnalysisConsole::parseRange(const std::string& range)
 {
@@ -74,11 +81,15 @@ common::AddressRange defaultAnalysisRange(const common::Address& start)
 /**
  * Runs decompilation on range of currently seeked function. Optional argument is
  */
-bool DataAnalysisConsole::analyzeRange(const std::string& command, const R2Database& binInfo)
+RzCmdStatus DataAnalysisConsole::analyzeRange(RzCore *core, int argc, const char **argv)
 {
+	std::lock_guard<std::recursive_mutex> lock(mutex);
+	R2Database info(*core);
 	std::string cache = "";
 
 	common::AddressRange toAnalyze;
+// TODO: re-enable
+#if 0
 	std::string params;
 	auto space = std::find(command.begin(), command.end(), ' ');
 	if (space != command.end()) {
@@ -97,8 +108,9 @@ bool DataAnalysisConsole::analyzeRange(const std::string& command, const R2Datab
 			toAnalyze = defaultAnalysisRange(binInfo.seekedAddress());
 		}
 	}
+#endif
 
-	auto config = createConfig(binInfo, cache);
+	auto config = createConfig(info, cache);
 
 	// TODO:
 	// RetDec experiences off by one error.
@@ -111,25 +123,27 @@ bool DataAnalysisConsole::analyzeRange(const std::string& command, const R2Datab
 
 	auto [code, _] = decompile(config, false);
 	if (code == nullptr)
-		return false;
+		return RZ_CMD_STATUS_ERROR;
 
-	binInfo.setFunctions(config);
+	info.setFunctions(config);
 
-	return true;
+	return RZ_CMD_STATUS_OK;
 }
 
-bool DataAnalysisConsole::analyzeWholeBinary(const std::string&, const R2Database& binInfo)
+RzCmdStatus DataAnalysisConsole::analyzeWholeBinary(RzCore *core, int argc, const char **argv)
 {
-	auto config = createConfig(binInfo, "whole");
+	std::lock_guard<std::recursive_mutex> lock(mutex);
+	R2Database info(*core);
+	auto config = createConfig(info, "whole");
 
 	auto [code, _] = decompile(config, false);
 	if (code == nullptr)
-		return false;
+		return RZ_CMD_STATUS_ERROR;
 
 	// r_core_annotated_code_print(code, nullptr);
-	binInfo.setFunctions(config);
+	info.setFunctions(config);
 
-	return true;
+	return RZ_CMD_STATUS_OK;
 }
 
 }

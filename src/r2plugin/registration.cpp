@@ -15,30 +15,9 @@
 using namespace retdec::r2plugin;
 using namespace retdec::utils::io;
 
-/**
- * R2 console registration method. This method is called
- * after each command typed into r2. If the function wants
- * to respond on provided command, provides response and returns true.
- * Activation method for this function is matching prefix of the input.
- *  -> prefix(input) == CMD_PREFIX
- *
- * Otherwise the function must return false which will indicate that
- * other command should be executed.
- */
-static int r2retdec_cmd(void *user, const char* input)
+static bool rz_retdec_init(RzCore *core)
 {
-	static std::mutex mutex;
-	RzCore& core = *(RzCore*)user;
-	R2Database binInfo(core);
-
-	try {
-		std::lock_guard<std::mutex> lock (mutex);
-		return DecompilerConsole::handleCommand(std::string(input), binInfo);
-	}
-	catch (const std::exception& e) {
-		Log::error() << Log::Error << e.what() << std::endl;
-		return true;
-	}
+	return DecompilerConsole::registerCommands(core->rcmd);
 }
 
 // Structure containing plugin info.
@@ -48,8 +27,7 @@ RzCorePlugin rz_core_plugin_retdec = {
 	/* .license = */ "MIT",
 	/* .author = */ "Avast",
 	/* .version = */ "0.2",
-// TODO	/* .call = */ r2retdec_cmd,
-	/* .init = */ nullptr,
+	/* .init = */ rz_retdec_init,
 	/* .fini = */ nullptr
 };
 

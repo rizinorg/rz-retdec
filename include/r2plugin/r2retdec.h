@@ -16,6 +16,9 @@
 namespace retdec {
 namespace r2plugin {
 
+/// Global Mutex for all RetDec state.
+extern std::recursive_mutex mutex;
+
 RZ_API RzAnnotatedCode* decompile(RzCore *core, ut64 addr);
 
 std::pair<RzAnnotatedCode*, retdec::config::Config> decompile(

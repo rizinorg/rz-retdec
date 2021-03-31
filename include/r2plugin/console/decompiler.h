@@ -21,8 +21,8 @@ protected:
 	DecompilerConsole();
 
 public:
-	/// Calls handle method of the DecompilerConsole singleton.
-	static bool handleCommand(const std::string& commad, const R2Database& info);
+	/// Register all decompilation commands into the given RzCmd instance.
+	static bool registerCommands(RzCmd* cmd);
 
 public:
 	/// Representation of pdz command.
@@ -38,26 +38,26 @@ public:
 	static const Console::Command DecompileCommentCurrent;
 
 	/// Representation of pdza command.
-	static const Console::Command DecompilerDataAnalysis;
+	static const Console::CommandGroup DecompilerDataAnalysis;
 
 	/// Representation of pdze command.
 	static const Console::Command ShowUsedEnvironment;
 
 private:
 	/// Implementation of pdz command.
-	static bool decompileCurrent(const std::string&, const R2Database& info);
+	static RzCmdStatus decompileCurrent(RzCore *core, int argc, const char **argv);
 
 	/// Implementation of pdzj command.
-	static bool decompileJsonCurrent(const std::string&, const R2Database& info);
+	static RzCmdStatus decompileJsonCurrent(RzCore *core, int argc, const char **argv);
 
 	/// Implementation of pdzo command.
-	static bool decompileWithOffsetsCurrent(const std::string&, const R2Database& info);
+	static RzCmdStatus decompileWithOffsetsCurrent(RzCore *core, int argc, const char **argv);
 
 	/// Implementation of pdz* command.
-	static bool decompileCommentCurrent(const std::string&, const R2Database& info);
+	static RzCmdStatus decompileCommentCurrent(RzCore *core, int argc, const char **argv);
 
 	/// Implementation of pdze command.
-	static bool showEnvironment(const std::string&, const R2Database&);
+	static RzCmdStatus showEnvironment(RzCore *core, int argc, const char **argv);
 
 	static config::Config createConsoleConfig(const R2Database& binInfo);
 

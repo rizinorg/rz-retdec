@@ -16,13 +16,17 @@ using namespace retdec::utils::io;
 namespace retdec {
 namespace r2plugin {
 
-DecompilerConsole DecompilerConsole::console;
+#define with(T, ...) ([]{ T ${}; __VA_ARGS__; return $; }())
+
+static const RzCmdDescArg args_none[] = {{}};
 
 DecompilerConsole::DecompilerConsole(): Console(
-	"pdz",
-	"Native RetDec decompiler plugin.",
+	with(RzCmdDescHelp,
+		$.summary = "Native RetDec decompiler plugin.";
+		$.args = args_none
+	),
+	DecompileCurrent,
 	{
-		{"", DecompileCurrent},
 		{"*", DecompileCommentCurrent},
 		{"a", DecompilerDataAnalysis},
 		{"e", ShowUsedEnvironment},
@@ -33,35 +37,49 @@ DecompilerConsole::DecompilerConsole(): Console(
 }
 
 const Console::Command DecompilerConsole::DecompileCurrent = {
-	"Show decompilation result of current function.",
+	with(RzCmdDescHelp,
+		$.summary = "Show decompilation result of current function.";
+		$.args = args_none
+	),
 	DecompilerConsole::decompileCurrent
 };
 
 const Console::Command DecompilerConsole::DecompileWithOffsetsCurrent = {
-	"Show current decompiled function side by side with offsets.",
+	with(RzCmdDescHelp,
+		$.summary = "Show current decompiled function side by side with offsets.";
+		$.args = args_none
+	),
 	DecompilerConsole::decompileWithOffsetsCurrent
 };
 
 const Console::Command DecompilerConsole::DecompileJsonCurrent = {
-	"Dump current decompiled function as JSON.",
+	with(RzCmdDescHelp,
+		$.summary = "Dump current decompiled function as JSON.";
+		$.args = args_none
+	),
 	DecompilerConsole::decompileJsonCurrent
 };
 
 const Console::Command DecompilerConsole::DecompileCommentCurrent = {
-	"Return decompilation of current function to r2 as comment.",
+	with(RzCmdDescHelp,
+		$.summary = "Return decompilation of current function to r2 as comment.";
+		$.args = args_none
+	),
 	DecompilerConsole::decompileCommentCurrent
 };
 
-const Console::Command DecompilerConsole::DecompilerDataAnalysis = {
-	"Run RetDec analysis.",
-	DataAnalysisConsole::handleCommand,
-	true
-};
+const Console::CommandGroup DecompilerConsole::DecompilerDataAnalysis(DataAnalysisConsole::getInstance());
 
 const Console::Command DecompilerConsole::ShowUsedEnvironment = {
-	"Show environment variables.",
+	with(RzCmdDescHelp,
+		$.summary = "Show environment variables.";
+		$.args = args_none
+	),
 	DecompilerConsole::showEnvironment
 };
+
+// this must be down here to be initialized after its commands.
+DecompilerConsole DecompilerConsole::console;
 
 config::Config DecompilerConsole::createConsoleConfig(const R2Database& binInfo)
 {
@@ -75,65 +93,75 @@ config::Config DecompilerConsole::createConsoleConfig(const R2Database& binInfo)
 	return config;
 }
 
-bool DecompilerConsole::handleCommand(const std::string& command, const R2Database& info)
+bool DecompilerConsole::registerCommands(RzCmd* cmd)
 {
-	return DecompilerConsole::console.handle(command, info);
+	RzCmdDesc* root_desc = rz_cmd_get_root(cmd);
+	return DecompilerConsole::console.registerConsole(cmd, root_desc, CMD_PREFIX);
 }
 
-bool DecompilerConsole::decompileCurrent(const std::string&, const R2Database& binInfo)
+RzCmdStatus DecompilerConsole::decompileCurrent(RzCore *core, int argc, const char **argv)
 {
-	auto config = createConsoleConfig(binInfo);
+	std::lock_guard<std::recursive_mutex> lock(mutex);
+	R2Database info(*core);
+	auto config = createConsoleConfig(info);
 
 	auto [code, _] = decompile(config, true);
 	if (code == nullptr)
-		return false;
+		return RZ_CMD_STATUS_ERROR;
 
 	rz_core_annotated_code_print(code, nullptr);
-	return true;
+	return RZ_CMD_STATUS_OK;
 }
 
-bool DecompilerConsole::decompileWithOffsetsCurrent(const std::string&, const R2Database& binInfo)
+RzCmdStatus DecompilerConsole::decompileWithOffsetsCurrent(RzCore *core, int argc, const char **argv)
 {
-	auto config = createConsoleConfig(binInfo);
+	std::lock_guard<std::recursive_mutex> lock(mutex);
+	R2Database info(*core);
+	auto config = createConsoleConfig(info);
 
 	auto [code, _] = decompile(config, true);
 	if (code == nullptr)
-		return false;
+		return RZ_CMD_STATUS_ERROR;
 
 	RzVector *offsets = rz_annotated_code_line_offsets(code);
 	rz_core_annotated_code_print(code, offsets);
 	rz_vector_free(offsets);
 
-	return true;
+	return RZ_CMD_STATUS_OK;
 }
 
 
-bool DecompilerConsole::decompileJsonCurrent(const std::string&, const R2Database& binInfo)
+RzCmdStatus DecompilerConsole::decompileJsonCurrent(RzCore *core, int argc, const char **argv)
 {
-	auto config = createConsoleConfig(binInfo);
+	std::lock_guard<std::recursive_mutex> lock(mutex);
+	R2Database info(*core);
+	auto config = createConsoleConfig(info);
 
 	auto [code, _] = decompile(config, true);
 	if (code == nullptr)
-		return false;
+		return RZ_CMD_STATUS_ERROR;
 
 	rz_core_annotated_code_print_json(code);
-	return true;
+	return RZ_CMD_STATUS_OK;
 }
 
-bool DecompilerConsole::decompileCommentCurrent(const std::string&, const R2Database& binInfo)
+RzCmdStatus DecompilerConsole::decompileCommentCurrent(RzCore *core, int argc, const char **argv)
 {
-	auto config = createConsoleConfig(binInfo);
+	std::lock_guard<std::recursive_mutex> lock(mutex);
+	R2Database info(*core);
+	auto config = createConsoleConfig(info);
 
 	auto [code, _] = decompile(config, true);
 	if (code == nullptr)
-		return false;
+		return RZ_CMD_STATUS_ERROR;
 
 	rz_core_annotated_code_print_comment_cmds(code);
-	return true;
+	return RZ_CMD_STATUS_OK;
 }
 
-bool DecompilerConsole::showEnvironment(const std::string&, const R2Database&)
+RzCmdStatus DecompilerConsole::showEnvironment(RzCore *core, int argc, const char **argv)
 {
+	std::lock_guard<std::recursive_mutex> lock(mutex);
 	Log::info() << Log::Color::Green << "Environment:" << std::endl;
 
 	std::string padding = "    ";
@@ -146,7 +174,7 @@ bool DecompilerConsole::showEnvironment(const std::string&, const R2Database&)
 	}
 
 	Log::info() << padding << "DEC_SAVE_DIR = " << outDir << std::endl;
-	return true;
+	return RZ_CMD_STATUS_OK;
 }
 
 }
