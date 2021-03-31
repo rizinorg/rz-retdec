@@ -17,16 +17,30 @@ using namespace retdec::utils::io;
 namespace retdec {
 namespace r2plugin {
 
+#define with(T, ...) ([]{ T ${}; __VA_ARGS__; return $; }())
+
 static const RzCmdDescArg args_none[] = {{}};
 
-#define with(T, ...) ([]{ T ${}; __VA_ARGS__; return $; }())
+static const RzCmdDescArg args_range[] = {
+	with(RzCmdDescArg,
+		$.name = "start";
+		$.optional = true;
+		$.type = RZ_CMD_ARG_TYPE_NUM;
+	),
+	with(RzCmdDescArg,
+		$.name = "end";
+		$.optional = true;
+		$.type = RZ_CMD_ARG_TYPE_NUM;
+	),
+	{},
+};
 
 Console::Command DataAnalysisConsole::AnalyzeRange(
 	with(RzCmdDescHelp,
 		$.summary =
 			"Analyze and import functions at specified range. "
 			"Default range is range of currently seeked function.";
-		$.args = args_none // TODO: "[start-end]"
+		$.args = args_range
 	),
 	analyzeRange
 );
@@ -54,28 +68,6 @@ DataAnalysisConsole::DataAnalysisConsole(): Console(
 // this must be down here to be initialized after its commands.
 DataAnalysisConsole DataAnalysisConsole::console;
 
-common::AddressRange DataAnalysisConsole::parseRange(const std::string& range)
-{
-	std::smatch match;
-	std::regex rangeRegex("(0x)?([0-9a-fA-F][0-9a-fA-F]*)(?:-|  *)(0x)?([0-9a-fA-F][0-9a-fA-F]*)");
-
-	if (!std::regex_match(range, match, rangeRegex))
-		throw DecompilationError("Invalid range: "+range);
-
-	char* end = nullptr;
-	size_t base = match[1].str() == "0x" ? 16 : 10;
-	auto beginRange = std::strtol(match[2].str().c_str(), &end, base);
-	if (end == nullptr || *end != '\0')
-		throw DecompilationError("Invalid number: "+match[2].str());
-
-	base = match[3].str() == "0x" ? 16 : 10;
-	auto endRange = std::strtol(match[4].str().c_str(), &end, base);
-	if (end == nullptr || *end != '\0')
-		throw DecompilationError("Invalid number: "+match[4].str());
-
-	return common::AddressRange(beginRange, endRange);
-}
-
 common::AddressRange defaultAnalysisRange(const common::Address& start)
 {
 	// Magic constant 2000 should be more cleverly set.
@@ -88,50 +80,50 @@ common::AddressRange defaultAnalysisRange(const common::Address& start)
 RzCmdStatus DataAnalysisConsole::analyzeRange(RzCore *core, int argc, const char **argv)
 {
 	std::lock_guard<std::recursive_mutex> lock(mutex);
-	R2Database info(*core);
-	std::string cache = "";
+	try {
+		R2Database info(*core);
+		std::string cache = "";
 
-	common::AddressRange toAnalyze;
-// TODO: re-enable
-#if 0
-	std::string params;
-	auto space = std::find(command.begin(), command.end(), ' ');
-	if (space != command.end()) {
-		params = std::string(std::next(space), command.end());
-		toAnalyze = parseRange(params);
-	}
-	else {
-		try {
-			auto fnc = binInfo.fetchSeekedFunction();
+		common::AddressRange toAnalyze;
+		if (argc > 1) {
+			ut64 start = rz_num_math(core->num, argv[1]);
+			if (argc > 2) {
+				ut64 end = rz_num_math(core->num, argv[2]);
+				toAnalyze = common::AddressRange(start, end);
+			} else {
+				toAnalyze = defaultAnalysisRange(start);
+			}
+		} else {
+			auto fnc = info.fetchSeekedFunction();
 			toAnalyze = fnc;
 			if (fnc.getSize() == 0)
 				toAnalyze = defaultAnalysisRange(fnc.getStart());
 
 			cache = cacheName(fnc);
-		} catch (DecompilationError){
-			toAnalyze = defaultAnalysisRange(binInfo.seekedAddress());
 		}
-	}
-#endif
 
-	auto config = createConfig(info, cache);
+		auto config = createConfig(info, cache);
 
-	// TODO:
-	// RetDec experiences off by one error.
-	// This should be noted in RetDec issue.
-	if (toAnalyze.getStart() != 0)
-		toAnalyze.setStart(toAnalyze.getStart()-1);
+		// TODO:
+		// RetDec experiences off by one error.
+		// This should be noted in RetDec issue.
+		if (toAnalyze.getStart() != 0)
+			toAnalyze.setStart(toAnalyze.getStart()-1);
 
-	config.parameters.selectedRanges.insert(toAnalyze);
-	config.parameters.setIsSelectedDecodeOnly(true);
+		config.parameters.selectedRanges.insert(toAnalyze);
+		config.parameters.setIsSelectedDecodeOnly(true);
 
-	auto [code, _] = decompile(config, false);
-	if (code == nullptr)
+		auto [code, _] = decompile(config, false);
+		if (code == nullptr)
+			return RZ_CMD_STATUS_ERROR;
+
+		info.setFunctions(config);
+
+		return RZ_CMD_STATUS_OK;
+	} catch (const std::exception& e){
+		Log::error() << Log::Error << e.what() << std::endl;
 		return RZ_CMD_STATUS_ERROR;
-
-	info.setFunctions(config);
-
-	return RZ_CMD_STATUS_OK;
+	}
 }
 
 RzCmdStatus DataAnalysisConsole::analyzeWholeBinary(RzCore *core, int argc, const char **argv)

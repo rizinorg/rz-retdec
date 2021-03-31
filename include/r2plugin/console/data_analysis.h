@@ -40,10 +40,6 @@ private:
 	static RzCmdStatus analyzeWholeBinary(RzCore *core, int argc, const char **argv);
 
 private:
-	/// Helper method. Parses arguments of pdza commnad.
-	static common::AddressRange parseRange(const std::string& range);
-
-private:
 	/// Singleton.
 	static DataAnalysisConsole console;
 };
