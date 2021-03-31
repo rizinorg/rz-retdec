@@ -15,7 +15,7 @@
 
 class RetDecPlugin : public QObject, CutterPlugin {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.radare.cutter.plugins.r2retdec")
+    Q_PLUGIN_METADATA(IID "re.rizin.cutter.plugins.r2retdec")
     Q_INTERFACES(CutterPlugin)
 
     class RetDec: public Decompiler {
