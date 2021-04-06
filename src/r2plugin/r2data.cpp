@@ -350,10 +350,10 @@ void R2Database::fetchExtraArgsData(ObjectSequentialContainer &args, RzAnalysisF
 	RzAnalysisFuncArg *arg;
 
 	char* key = resolve_fcn_name(_r2core.analysis, r2fnc.name);
-	if (!key || !_r2core.analysis || !_r2core.analysis->sdb_types)
+	if (!key || !_r2core.analysis || !_r2core.analysis->typedb)
 		return;
 
-	int nargs = rz_type_func_args_count(_r2core.analysis->sdb_types, key);
+	int nargs = rz_type_func_args_count(_r2core.analysis->typedb, key);
 	if (nargs) {
 		RzList *list = rz_core_get_func_args(&_r2core, r2fnc.name);
 		for (RzListIter *it = list->head; it; it = it->n) {
@@ -390,10 +390,10 @@ void R2Database::fetchFunctionReturnType(Function &function, RzAnalysisFunction 
 	function.returnType = Type("void");
 	char* key = resolve_fcn_name(_r2core.analysis, r2fnc.name);
 
-	if (!key || !_r2core.analysis || !_r2core.analysis->sdb_types)
+	if (!key || !_r2core.analysis || !_r2core.analysis->typedb)
 		return;
 
-	if (auto returnType = rz_type_func_ret(_r2core.analysis->sdb_types, key))
+	if (auto returnType = rz_type_func_ret(_r2core.analysis->typedb, key))
 		function.returnType = Type(fu::convertTypeToLlvm(returnType));
 }
 
