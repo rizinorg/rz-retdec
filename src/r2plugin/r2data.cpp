@@ -50,7 +50,11 @@ R2Database::R2Database(RzCore &core):
  */
 std::string R2Database::fetchFilePath() const
 {
-	return _r2core.file->binb.bin->file;
+	if (rz_pvector_empty(&_r2core.file->binfiles)) {
+		return std::string();
+	}
+	RzBinFile *bf = reinterpret_cast<RzBinFile *>(rz_pvector_at(&_r2core.file->binfiles, 0));
+	return bf->file ? std::string(bf->file) : "";
 }
 
 void R2Database::setFunction(const common::Function &fnc) const
