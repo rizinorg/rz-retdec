@@ -1,32 +1,16 @@
-# RetDec Radare2 plugin
+# RetDec Rizin plugin
 
-![retdec-r2plugin CI](https://github.com/avast/retdec-r2plugin/workflows/retdec-r2plugin%20CI/badge.svg?branch=master)
+RetDec plugin for [Rizin](https://github.com/rizinorg/rizin).
 
-RetDec plugin for [Radare2](https://github.com/radareorg/radare2).
-
-The plugin integrates RetDec decompiler into Radare2 console. RetDec Radare2 plugin is shipped with a bundled RetDec version, but you can use your own version (specified below).
+The plugin integrates RetDec decompiler into Rizin console. rz-retdec is shipped with a bundled RetDec version, but you can use your own version (specified below).
 
 With the bundled version of RetDec you can decompile the following architectures:
 * 32-bit: Intel x86, ARM, MIPS, PIC32, and PowerPC.
 * 64-bit: x86-64, ARM64 (AArch64).
 
-## Installation and Use
+### Use in Rizin Console
 
-The plugin was tested and should work on following operating systems: Linux, macOS and Windows.
-
-### R2PM Installation
-
-The r2pm package is available for Radare2 version 4.5.0 and newer. To install the plugin using r2pm use:
-
-```bash
-$ r2pm -i retdec-r2plugin
-```
-
-This will, however, install only the plugin for r2 console. To use the Cutter plugin you must build this plugin manually. See the [Build and Installation](https://github.com/avast/retdec-r2plugin#build-and-installation) section.
-
-### Use in Radare2 Console
-
-In r2 console you can type `pdz?` to print help:
+In rizin console you can type `pdz?` to print help:
 
 ```bash
 Usage: pdz   # Native RetDec decompiler plugin.
@@ -46,43 +30,35 @@ $ export DEC_SAVE_DIR=<path> # custom path for output of decompilation to be sav
 
 ## Build and Installation
 
-This section describes a local build and installation of RetDec Radare2 plugin.
+This section describes a local build and installation of rz-retdec.
 
 ### Requirements
 
 * A compiler supporting c++17
 * CMake (version >= 3.6)
-* Existing Radare2 installation (version >= 4.5.0)
+* Existing Rizin installation
 
 To build the bundled version of RetDec see [RetDec requirements section](https://github.com/avast/retdec#requirements).
 
 ### Process
 
 * Clone the repository:
-  * `git clone https://github.com/avast/retdec-r2plugin`
-* Linux and MacOS:
-  * `cd retdec-r2plugin`
+  * `git clone https://github.com/rizinorg/rz-retdec`
+  * `cd rz-retdec`
   * `mkdir build && cd build`
-  * `cmake .. -DCMAKE_INSTALL_PREFIX=<path>`
-  * `make -jN` (`N` is the number of processes to use for parallel build, typically number of cores + 1 gives fastest compilation time)
+  * `cmake .. -DCMAKE_INSTALL_PREFIX=~/.local`
+  * `make`
   * `make install`
-* Windows:
-  * Open a command prompt (e.g. `cmd.exe`)
-  * `cd retdec-r2plugin`
-  * `mkdir build && cd build`
-  * `cmake .. -DCMAKE_INSTALL_PREFIX=<path>`
-  * `cmake --build . --config Release -- -m`
-  * `cmake --build . --config Release --target install`
 
 You have to pass the following parameters to `cmake`:
-* `-DCMAKE_INSTALL_PREFIX=<path>` to set the installation path to `<path>`. It is important to set the `<path>` to a location where Radare2 can load plugins from (for example `~/.local`).
+* `-DCMAKE_INSTALL_PREFIX=<path>` to set the installation path to `<path>`. It is important to set the `<path>` to a location where Rizin can load plugins from (for example `~/.local`).
 
 You can pass the following additional parameters to `cmake`:
 * `-DBUILD_BUNDLED_RETDEC=ON` to build bundled RetDec version with the plugin. The build of the bundled RetDec is by default turned on. RetDec will be installed to `CMAKE_INSTALL_PREFIX`. When turned OFF system is searched for RetDec installation.
-* `-DR2PLUGIN_DOC=OFF` optional parameter to build Doxygen documentation.
+* `-DRZ_RETDEC_DOC=OFF` optional parameter to build Doxygen documentation.
 * `-DBUILD_CUTTER_PLUGIN=OFF` setting to ON will build the Cutter plugin. Cutter must be built with support for plugin loading, see [Cutter documentation](https://cutter.re/docs/plugins.html).
 
-*Note*: retdec-r2plugin requires [filesystem](https://en.cppreference.com/w/cpp/filesystem) library to be linked with the plugin. CMake will try to find the library in the system but on GCC 7 it might not be able to do so automatically. In that case you must specify a path where this library is located in the system to the cmake by adding:
+*Note*: rz-retdec requires [filesystem](https://en.cppreference.com/w/cpp/filesystem) library to be linked with the plugin. CMake will try to find the library in the system but on GCC 7 it might not be able to do so automatically. In that case you must specify a path where this library is located in the system to the cmake by adding:
 * `-DCMAKE_LIBRARY_PATH=${PATH_TO_FILESTSTEM_DIR}`
 
 On GCC 7 is `stdc++fs` located in:
@@ -90,10 +66,26 @@ On GCC 7 is `stdc++fs` located in:
 
 ## License
 
-Copyright (c) 2019 Avast Software, licensed under the MIT license. See the [LICENSE](https://github.com/avast/retdec-r2plugin/blob/master/LICENSE) file for more details.
+rz-retdec Copyright (c) 2022 RizinOrg
 
-RetDec Radare2 plugin uses third-party libraries or other resources listed, along with their licenses, in the [LICENSE-THIRD-PARTY](https://github.com/avast/retdec-r2plugin/blob/master/LICENSE-THIRD-PARTY) file.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, version 3.
 
-## Contributing
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
 
-See [RetDec contribution guidelines](https://github.com/avast/retdec/wiki/Contribution-Guidelines).
+You should have received a copy of the GNU Lesser General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+rz-retdec uses third-party libraries or other resources that may be
+distributed under licenses different than this software.
+
+In the event that we accidentally failed to list a required notice,
+please bring it to our attention by contacting the repository owner.
+
+RetDec r2plugin uses the following third-party libraries or other resources:
+1) RetDec: https://github.com/avast/retdec Copyright (c) 2017 Avast Software, [MIT license](LICENSES/MIT.txt)
+2) retdec-r2plugin: https://github.com/avast/retdec-r2plugin Copyright (c) 2020 Avast Software, [MIT license](LICENSES/MIT.txt)
