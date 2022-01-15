@@ -11,7 +11,7 @@
 #include <string>
 
 namespace retdec {
-namespace r2plugin {
+namespace rzplugin {
 
 const std::string DefaultConfigJSON = R"(
 {

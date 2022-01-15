@@ -8,11 +8,11 @@
 
 #pragma once
 
-#include "r2plugin/console/console.h"
-#include "r2plugin/r2retdec.h"
+#include "rz-plugin/console/console.h"
+#include "rz-plugin/rzretdec.h"
 
 namespace retdec {
-namespace r2plugin {
+namespace rzplugin {
 
 /**
  * Decompiler class. Provides and implements interface for decompiler
@@ -64,7 +64,7 @@ private:
 	/// Implementation of pdze command.
 	static RzCmdStatus showEnvironment(RzCore *core, int argc, const char **argv);
 
-	static config::Config createConsoleConfig(const R2Database& binInfo);
+	static config::Config createConsoleConfig(const RizinDatabase& binInfo);
 
 private:
 	/// Singleton.

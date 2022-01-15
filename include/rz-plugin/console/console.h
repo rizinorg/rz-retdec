@@ -11,10 +11,10 @@
 #include <map>
 #include <tuple>
 
-#include "r2plugin/r2data.h"
+#include "rz-plugin/data.h"
 
 namespace retdec {
-namespace r2plugin {
+namespace rzplugin {
 
 /**
  * @brief Provides console user interface.

@@ -9,7 +9,7 @@
 #include <exception>
 
 #include "cutter-plugin/core_plugin.h"
-#include "r2plugin/r2retdec.h"
+#include "rz-plugin/rzretdec.h"
 
 void RetDecPlugin::setupPlugin()
 {

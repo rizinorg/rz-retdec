@@ -16,19 +16,17 @@
 #include <retdec/config/parameters.h>
 #include <sstream>
 
-#include "r2plugin/r2retdec.h"
-#include "r2plugin/r2cgen.h"
-#include "r2plugin/r2utils.h"
+#include "rz-plugin/rzretdec.h"
+#include "rz-plugin/cgen.h"
+#include "rz-plugin/utils.h"
 
 #include "decompiler-config.h"
 
-#include "r2plugin/r2retdec.h"
-
-using fu = retdec::r2plugin::FormatUtils;
+using fu = retdec::rzplugin::FormatUtils;
 using namespace retdec::utils::io;
 
 namespace retdec {
-namespace r2plugin {
+namespace rzplugin {
 
 std::recursive_mutex mutex;
 
@@ -182,8 +180,8 @@ void createConfigHashFile(const retdec::config::Config& config)
  */
 retdec::config::Config loadDefaultConfig()
 {
-	// Perhaps support signatures are installed in RZ_HOME_PLUGDIR?
-	auto plugdir = rz_str_home(RZ_HOME_PLUGINS);
+	// Perhaps support signatures are installed in RZ_PLUGDIR?
+	auto plugdir = rz_str_home(RZ_PLUGINS);
 
 	// Loads configuration from file - also contains default config.
 	auto rdConf = retdec::config::Config::fromJsonString(DefaultConfigJSON);
@@ -200,7 +198,7 @@ std::string cacheName(const common::Function& fnc)
 	return fnc.getName()+"@"+hexAddr.str();
 }
 
-config::Config createConfig(const R2Database& binInfo, const std::string& cacheSuffix)
+config::Config createConfig(const RizinDatabase& binInfo, const std::string& cacheSuffix)
 {
 	auto config = loadDefaultConfig();
 
@@ -288,7 +286,7 @@ std::pair<RzAnnotatedCode*, retdec::config::Config> decompile(
 RZ_API RzAnnotatedCode* decompile(RzCore *core, ut64 addr){
 	std::lock_guard<std::recursive_mutex> lock(mutex);
 
-	R2Database binInfo(*core);
+	RizinDatabase binInfo(*core);
 
 	auto fnc = binInfo.fetchFunction(addr);
 	auto config = createConfig(binInfo, cacheName(fnc));

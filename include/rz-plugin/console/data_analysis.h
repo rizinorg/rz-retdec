@@ -8,10 +8,10 @@
 
 #pragma once
 
-#include "r2plugin/console/console.h"
+#include "rz-plugin/console/console.h"
 
 namespace retdec {
-namespace r2plugin {
+namespace rzplugin {
 
 /**
  * Provides and implements Data Analysis console interface
@@ -24,7 +24,7 @@ protected:
 
 public:
 	/// Calls handle method of singleton.
-	static bool handleCommand(const std::string& commad, const R2Database& info);
+	static bool handleCommand(const std::string& commad, const RizinDatabase& info);
 
 	/// Representation of pdza command.
 	static Console::Command AnalyzeRange;

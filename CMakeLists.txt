@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(retdec-r2plugin C CXX)
+project(rz-retdec C CXX)
 
 # Minimal required version
 set(CMAKE_CXX_STANDARD 17)
@@ -57,15 +57,15 @@ elseif(UNIX)
         set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
 endif()
 
-option(R2PLUGIN_DOC "Build r2plugin documentation" OFF)
-if (R2PLUGIN_DOC)
+option(RZ_RETDEC_DOC "Build rz-retdec documentation" OFF)
+if (RZ_RETDEC_DOC)
 	add_subdirectory(doc)
 endif()
 
-get_filename_component(RIZIN_INSTALL_PATH "${RIZIN_INSTALL_PATH}" REALPATH BASE_DIR "${CMAKE_BINARY_DIR}")
+find_package(Rizin REQUIRED Core)
 
-set(RIZIN_INSTALL_PLUGDIR "share/rizin/plugins" CACHE PATH "Directory to install rizin plugin into")
-set(CUTTER_INSTALL_PLUGDIR "share/rizin/cutter/plugins/native" CACHE PATH "Directory to install Cutter plugin into")
+set(RIZIN_INSTALL_PLUGDIR "${Rizin_PLUGINDIR}" CACHE STRING "Directory to install rizin plugins into")
+set(CUTTER_INSTALL_PLUGDIR "share/rizin/cutter/plugins/native" CACHE STRING "Directory to install Cutter plugin into")
 
 if (RETDEC_INSTALL_PREFIX)
 	if (NOT IS_ABSOLUTE "${RIZIN_INSTALL_PLUGDIR}")
@@ -87,8 +87,6 @@ option(BUILD_CUTTER_PLUGIN "Build rz-retdec plugin for Cutter" OFF)
 option(BUILD_BUNDLED_RETDEC "Build retdec with the rz-retdec plugin" ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-
-find_package(Rizin REQUIRED)
 
 add_subdirectory(deps)
 add_subdirectory(src)

@@ -17,7 +17,7 @@
 
 class RetDecPlugin : public QObject, CutterPlugin {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "re.rizin.cutter.plugins.r2retdec")
+    Q_PLUGIN_METADATA(IID "re.rizin.cutter.plugins.retdec")
     Q_INTERFACES(CutterPlugin)
 
     class RetDec: public Decompiler {
@@ -32,11 +32,11 @@ public:
     void registerDecompilers() override;
 
     QString getName() const override {
-	    return "RetDec Decompiler (retdec-r2plugin)";
+	    return "RetDec Decompiler (rz-retdec)";
     }
 
     QString getAuthor() const override {
-	    return "Avast";
+	    return "RizinOrg and Avast";
     }
 
     QString getDescription() const override {

@@ -6,8 +6,8 @@
  * @brief Information gathering from Rizin and user
  */
 
-#ifndef RETDEC_R2PLUGIN_R2_INFO_H
-#define RETDEC_R2PLUGIN_R2_INFO_H
+#ifndef RZ_RETDEC_DATA_H
+#define RZ_RETDEC_DATA_H
 
 #include <exception>
 #include <map>
@@ -19,16 +19,16 @@
 #include <retdec/config/config.h>
 
 namespace retdec {
-namespace r2plugin {
+namespace rzplugin {
 
-using R2Address = ut64;
+using RizinAddress = ut64;
 
 /**
- * R2Database implements wrapper around R2 API functions.
+ * RizinDatabase implements wrapper around Rizin API functions.
  */
-class R2Database {
+class RizinDatabase {
 public:
-	R2Database(RzCore &core);
+	RizinDatabase(RzCore &core);
 
 public:
 	std::string fetchFilePath() const;
@@ -47,7 +47,7 @@ public:
 	void fetchFunctionCallingconvention(common::Function &function, RzAnalysisFunction &r2fnc) const;
 	void fetchFunctionReturnType(common::Function &function, RzAnalysisFunction &r2fnc) const;
 	size_t fetchWordSize() const;
-	R2Address seekedAddress() const;
+	RizinAddress seekedAddress() const;
 	const RzCore& core() const;
 
 protected:
@@ -73,4 +73,4 @@ private:
 }
 }
 
-#endif /*RETDEC_R2PLUGIN_R2_INFO_H*/
+#endif

@@ -1,4 +1,4 @@
-add_subdirectory(r2plugin)
+add_subdirectory(rz-plugin)
 
 if(BUILD_CUTTER_PLUGIN)
 	add_subdirectory(cutter-plugin)

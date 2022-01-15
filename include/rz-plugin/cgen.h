@@ -16,7 +16,7 @@
 #include <rz_util/rz_annotated_code.h>
 
 namespace retdec {
-namespace r2plugin {
+namespace rzplugin {
 
 class R2CGenerator {
 public:

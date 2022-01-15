@@ -6,8 +6,8 @@
  * @brief Wrapper for conditional include of C++17 filesystem feature
  */
 
-#ifndef R2PLUGIN_WRAPPERS_FILESYSTEM_H
-#define R2PLUGIN_WRAPPERS_FILESYSTEM_H
+#ifndef RZ_RETDEC_WRAPPERS_FILESYSTEM_H
+#define RZ_RETDEC_WRAPPERS_FILESYSTEM_H
 
 #if __has_include(<filesystem>)
 	#include <filesystem>
@@ -22,4 +22,4 @@
 
 #endif
 
-#endif /*R2PLUGIN_WRAPPERS_FILESYSTEM_H*/
+#endif

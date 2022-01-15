@@ -10,10 +10,10 @@
 #include <regex>
 #include <sstream>
 
-#include "r2plugin/r2data.h"
-#include "r2plugin/r2utils.h"
+#include "rz-plugin/data.h"
+#include "rz-plugin/utils.h"
 
-using namespace retdec::r2plugin;
+using namespace retdec::rzplugin;
 
 /**
  * Empty body for the destructor. The will forbid FormatUtils class
@@ -138,8 +138,22 @@ const std::string FormatUtils::convertLlvmTypeToC(const std::string& llvmType)
 /**
  * @brief Provides convertion of C type into LLVM type.
  *
- * TODO: provide more complex types parsing.
+ * TODO: rewrite this with new RzType API
  */
+const std::string FormatUtils::convertTypeToLlvm(const RzTypeDB *tdb, const RzType *type)
+{
+	if (!type || !tdb) {
+		return "void";
+	}
+	char *typestr = rz_type_as_string(tdb, type);
+	if (!typestr) {
+		return "void";
+	}
+	const std::string &ctype(typestr);
+	rz_mem_free(typestr);
+	return convertTypeToLlvm(typestr);
+}
+
 const std::string FormatUtils::convertTypeToLlvm(const std::string &ctype)
 {
 	static const std::vector<char> structInternals = {'{', ',', '}'};

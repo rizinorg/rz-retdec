@@ -24,7 +24,7 @@ get_property(CORE_LIBS GLOBAL PROPERTY R2RETDEC_CORE_LIBS)
 target_link_libraries(r2retdec_cutter
 	${CORE_LIBS}
 	Qt5::Widgets
-	Rizin::librz
+	Rizin::Core
 	Cutter::Cutter
 )
 

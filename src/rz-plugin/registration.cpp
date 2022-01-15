@@ -10,10 +10,10 @@
 #include <retdec/utils/io/log.h>
 #include <rz_core.h>
 
-#include "r2plugin/r2data.h"
-#include "r2plugin/console/decompiler.h"
+#include "rz-plugin/data.h"
+#include "rz-plugin/console/decompiler.h"
 
-using namespace retdec::r2plugin;
+using namespace retdec::rzplugin;
 using namespace retdec::utils::io;
 
 static bool rz_retdec_init(RzCore *core)
@@ -23,11 +23,11 @@ static bool rz_retdec_init(RzCore *core)
 
 // Structure containing plugin info.
 RzCorePlugin rz_core_plugin_retdec = {
-	/* .name = */ "r2retdec",
+	/* .name = */ "rz-retdec",
 	/* .desc = */ "RetDec integration",
-	/* .license = */ "MIT",
-	/* .author = */ "Avast",
-	/* .version = */ "0.2",
+	/* .license = */ "LGPL3",
+	/* .author = */ "RizinOrg and Avast",
+	/* .version = */ nullptr,
 	/* .init = */ rz_retdec_init,
 	/* .fini = */ nullptr
 };
@@ -43,7 +43,7 @@ RZ_API RzLibStruct rizin_plugin = {
 	/* .data = */ &rz_core_plugin_retdec,
 	/* .version = */ RZ_VERSION,
 	/* .free = */ nullptr,
-	/* .pkgname */ "retdec-r2plugin"
+	/* .pkgname */ "rz-retdec"
 };
 
 #endif

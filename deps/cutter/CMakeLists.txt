@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.8)
 include(FetchContent)
 
 FetchContent_Declare(cutter
-	GIT_REPOSITORY https://github.com/radareorg/cutter
-	GIT_TAG master
+	GIT_REPOSITORY https://github.com/rizinorg/cutter
+	GIT_TAG dev
 )
 
 FetchContent_GetProperties(cutter)

@@ -16,13 +16,14 @@
 #include <rz_core.h>
 
 namespace retdec {
-namespace r2plugin {
+namespace rzplugin {
 
 class FormatUtils {
 private:
 	~FormatUtils();
 
 public:
+	static const std::string convertTypeToLlvm(const RzTypeDB *tdb, const RzType *type);
 	static const std::string convertTypeToLlvm(const std::string &ctype);
 	static const std::string convertLlvmTypeToC(const std::string &ctype);
 

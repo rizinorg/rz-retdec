@@ -8,15 +8,15 @@
 
 #include <retdec/utils/io/log.h>
 
-#include "r2plugin/console/decompiler.h"
-#include "r2plugin/console/data_analysis.h"
+#include "rz-plugin/console/decompiler.h"
+#include "rz-plugin/console/data_analysis.h"
 
 #define CMD_PREFIX "pdz" /**< Plugin activation command in r2 console.**/
 
 using namespace retdec::utils::io;
 
 namespace retdec {
-namespace r2plugin {
+namespace rzplugin {
 
 #define with(T, ...) ([]{ T ${}; __VA_ARGS__; return $; }())
 
@@ -83,7 +83,7 @@ const Console::Command DecompilerConsole::ShowUsedEnvironment = {
 // this must be down here to be initialized after its commands.
 DecompilerConsole DecompilerConsole::console;
 
-config::Config DecompilerConsole::createConsoleConfig(const R2Database& binInfo)
+config::Config DecompilerConsole::createConsoleConfig(const RizinDatabase& binInfo)
 {
 	auto fnc = binInfo.fetchSeekedFunction();
 	auto config = createConfig(binInfo, cacheName(fnc));
@@ -105,7 +105,7 @@ RzAnnotatedCode *DecompilerConsole::runDecompile(RzCore *core)
 {
 	std::lock_guard<std::recursive_mutex> lock(mutex);
 	try {
-		R2Database info(*core);
+		RizinDatabase info(*core);
 		auto config = createConsoleConfig(info);
 		auto [code, _] = decompile(config, true);
 		return code;

@@ -8,20 +8,20 @@
 
 #include <retdec/utils/io/log.h>
 
-#include "r2plugin/r2data.h"
-#include "r2plugin/r2utils.h"
+#include "rz-plugin/data.h"
+#include "rz-plugin/utils.h"
 
 using namespace retdec::common;
 using namespace retdec::config;
-using namespace retdec::r2plugin;
-using fu = retdec::r2plugin::FormatUtils;
+using namespace retdec::rzplugin;
+using fu = retdec::rzplugin::FormatUtils;
 using retdec::utils::io::Log;
 
 /**
  * Translation map between tokens representing calling convention type returned
  * by Radare2 and CallingConventionID that is recognized by RetDec.
  */
-std::map<const std::string, const CallingConventionID> R2Database::_r2rdcc = {
+std::map<const std::string, const CallingConventionID> RizinDatabase::_r2rdcc = {
 	{"arm32", CallingConventionID::CC_ARM},
 	{"arm64", CallingConventionID::CC_ARM64},
 
@@ -42,7 +42,7 @@ std::map<const std::string, const CallingConventionID> R2Database::_r2rdcc = {
 	{"watcom", CallingConventionID::CC_WATCOM}
 };
 
-R2Database::R2Database(RzCore &core):
+RizinDatabase::RizinDatabase(RzCore &core):
 	_r2core(core)
 {
 }
@@ -50,7 +50,7 @@ R2Database::R2Database(RzCore &core):
 /**
  * @brief Fetches path of the binary file from Radare2.
  */
-std::string R2Database::fetchFilePath() const
+std::string RizinDatabase::fetchFilePath() const
 {
 	if (rz_pvector_empty(&_r2core.file->binfiles)) {
 		return std::string();
@@ -59,7 +59,7 @@ std::string R2Database::fetchFilePath() const
 	return bf->file ? std::string(bf->file) : "";
 }
 
-void R2Database::setFunction(const common::Function &fnc) const
+void RizinDatabase::setFunction(const common::Function &fnc) const
 {
 	auto r2fnc = rz_analysis_get_function_at(_r2core.analysis, fnc.getStart().getValue());
 	if (r2fnc == nullptr) {
@@ -88,7 +88,7 @@ std::string sanitize(const std::string& a)
 	return ok.str();
 }
 
-void R2Database::copyFunctionData(const common::Function &fnc, RzAnalysisFunction &r2fnc) const
+void RizinDatabase::copyFunctionData(const common::Function &fnc, RzAnalysisFunction &r2fnc) const
 {
 	if (rz_analysis_function_rename(&r2fnc, fnc.getName().c_str()) == false) {
 		std::ostringstream err;
@@ -97,6 +97,8 @@ void R2Database::copyFunctionData(const common::Function &fnc, RzAnalysisFunctio
 		throw DecompilationError(err.str());
 	}
 
+	// TODO: Disabled as rz_analysis_str_to_fcn does not exist anymore
+#if 0
 	// TODO:
 	//   - Provide "hack":
 	//     Get/Create declaration string. When such string is available provide "sanitization".
@@ -121,10 +123,10 @@ void R2Database::copyFunctionData(const common::Function &fnc, RzAnalysisFunctio
 		data << ");";
 		rz_analysis_str_to_fcn(_r2core.analysis, &r2fnc, sanitize(data.str()).c_str());
 	}
-
+#endif
 }
 
-void R2Database::setFunctions(const config::Config& config) const
+void RizinDatabase::setFunctions(const config::Config& config) const
 {
 	for (auto& fnc: config.functions) {
 		setFunction(fnc);
@@ -136,7 +138,7 @@ void R2Database::setFunctions(const config::Config& config) const
  *
  * @param addr Analyzes the function at the given address.
  */
-Function R2Database::fetchFunction(ut64 addr) const
+Function RizinDatabase::fetchFunction(ut64 addr) const
 {
 	RzAnalysisFunction *cf = rz_analysis_get_fcn_in(_r2core.analysis, addr, RZ_ANALYSIS_FCN_TYPE_NULL);
 	if (cf == nullptr) {
@@ -148,7 +150,7 @@ Function R2Database::fetchFunction(ut64 addr) const
 	return convertFunctionObject(*cf);
 }
 
-Function R2Database::fetchSeekedFunction() const
+Function RizinDatabase::fetchSeekedFunction() const
 {
 	return fetchFunction(_r2core.offset);
 }
@@ -156,7 +158,7 @@ Function R2Database::fetchSeekedFunction() const
 /**
  * @brief Fetches functions and global variables from Radare2.
  */
-void R2Database::fetchFunctionsAndGlobals(Config &rconfig) const
+void RizinDatabase::fetchFunctionsAndGlobals(Config &rconfig) const
 {
 	auto list = rz_analysis_get_fcns(_r2core.analysis);
 	if (list != nullptr) {
@@ -178,7 +180,7 @@ void R2Database::fetchFunctionsAndGlobals(Config &rconfig) const
  *
  * This method is intended only for internal usage. That is
  * why this method is private. To obtain functions and global
- * variables the R2Database::fetchFunctionsAndGlobals
+ * variables the RizinDatabase::fetchFunctionsAndGlobals
  * method is available.
  *
  * Reason for this is that currently the global variables are
@@ -193,7 +195,7 @@ void R2Database::fetchFunctionsAndGlobals(Config &rconfig) const
  * This is another reason why this method is private and interface
  * to fetch globals is integrated with interface to fetch functions.
  */
-void R2Database::fetchGlobals(Config &config) const
+void RizinDatabase::fetchGlobals(Config &config) const
 {
 	RzBinObject *obj = rz_bin_cur_object(_r2core.bin);
 	if (obj == nullptr || obj->symbols == nullptr)
@@ -268,7 +270,7 @@ void R2Database::fetchGlobals(Config &config) const
  * Converts function object from its representation in Radare2 into
  * represnetation that is used in RetDec.
  */
-Function R2Database::convertFunctionObject(RzAnalysisFunction &r2fnc) const
+Function RizinDatabase::convertFunctionObject(RzAnalysisFunction &r2fnc) const
 {
 	auto start = rz_analysis_function_min_addr(&r2fnc);
 	auto end = rz_analysis_function_max_addr(&r2fnc);
@@ -297,7 +299,7 @@ Function R2Database::convertFunctionObject(RzAnalysisFunction &r2fnc) const
  * This is not, however, projected into function's calling convention and the args are needed to
  * be fetched with stack variables of the funciton.
  */
-void R2Database::fetchFunctionLocalsAndArgs(Function &function, RzAnalysisFunction &r2fnc) const
+void RizinDatabase::fetchFunctionLocalsAndArgs(Function &function, RzAnalysisFunction &r2fnc) const
 {
 	ObjectSetContainer locals;
 	ObjectSequentialContainer r2args, r2userArgs;
@@ -329,7 +331,7 @@ void R2Database::fetchFunctionLocalsAndArgs(Function &function, RzAnalysisFuncti
 			};
 
 			Object var(locvar->name, variableStorage);
-			var.type = Type(fu::convertTypeToLlvm(locvar->type));
+			var.type = Type(fu::convertTypeToLlvm(_r2core.analysis->typedb, locvar->type));
 			var.setRealName(locvar->name);
 
 			// If variable is argument it is a local variable too.
@@ -351,7 +353,7 @@ void R2Database::fetchFunctionLocalsAndArgs(Function &function, RzAnalysisFuncti
 /**
  * @brief Fetches function arguments defined by user.
  */
-void R2Database::fetchExtraArgsData(ObjectSequentialContainer &args, RzAnalysisFunction &r2fnc) const
+void RizinDatabase::fetchExtraArgsData(ObjectSequentialContainer &args, RzAnalysisFunction &r2fnc) const
 {
 	RzAnalysisFuncArg *arg;
 
@@ -366,7 +368,7 @@ void R2Database::fetchExtraArgsData(ObjectSequentialContainer &args, RzAnalysisF
 			arg = reinterpret_cast<RzAnalysisFuncArg*>(it->data);
 			Object var(arg->name, Storage::undefined());
 			var.setRealName(arg->name);
-			var.type = Type(fu::convertTypeToLlvm(arg->orig_c_type));
+			var.type = Type(fu::convertTypeToLlvm(_r2core.analysis->typedb, arg->orig_c_type));
 			args.push_back(var);
 		}
 		rz_list_free (list);
@@ -376,7 +378,7 @@ void R2Database::fetchExtraArgsData(ObjectSequentialContainer &args, RzAnalysisF
 /**
  * @brief Fetches the calling convention of the input function from Radare2.
  */
-void R2Database::fetchFunctionCallingconvention(Function &function, RzAnalysisFunction &r2fnc) const
+void RizinDatabase::fetchFunctionCallingconvention(Function &function, RzAnalysisFunction &r2fnc) const
 {
 	if (r2fnc.cc != nullptr) {
 		if (_r2rdcc.count(r2fnc.cc)) {
@@ -391,7 +393,7 @@ void R2Database::fetchFunctionCallingconvention(Function &function, RzAnalysisFu
 /**
  * @brief Fetches the return type of the input function from Radare2.
  */
-void R2Database::fetchFunctionReturnType(Function &function, RzAnalysisFunction &r2fnc) const
+void RizinDatabase::fetchFunctionReturnType(Function &function, RzAnalysisFunction &r2fnc) const
 {
 	function.returnType = Type("void");
 	char* key = resolve_fcn_name(_r2core.analysis, r2fnc.name);
@@ -400,23 +402,23 @@ void R2Database::fetchFunctionReturnType(Function &function, RzAnalysisFunction 
 		return;
 
 	if (auto returnType = rz_type_func_ret(_r2core.analysis->typedb, key))
-		function.returnType = Type(fu::convertTypeToLlvm(returnType));
+		function.returnType = Type(fu::convertTypeToLlvm(_r2core.analysis->typedb, returnType));
 }
 
 /**
  * @brief Fetch word size of the input file architecture.
  */
-size_t R2Database::fetchWordSize() const
+size_t RizinDatabase::fetchWordSize() const
 {
 	return rz_config_get_i(_r2core.config, "asm.bits");
 }
 
-ut64 R2Database::seekedAddress() const
+ut64 RizinDatabase::seekedAddress() const
 {
 	return _r2core.offset;
 }
 
-const RzCore& R2Database::core() const
+const RzCore& RizinDatabase::core() const
 {
 	return _r2core;
 }

@@ -9,10 +9,10 @@
 #include <fstream>
 #include <optional>
 
-#include "r2plugin/r2data.h"
-#include "r2plugin/r2cgen.h"
+#include "rz-plugin/data.h"
+#include "rz-plugin/cgen.h"
 
-using namespace retdec::r2plugin;
+using namespace retdec::rzplugin;
 
 /**
  * Translation map between decompilation JSON output and r2 understandable

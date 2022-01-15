@@ -11,13 +11,13 @@
 
 #include <retdec/utils/io/log.h>
 
-#include "r2plugin/r2retdec.h"
-#include "r2plugin/console/data_analysis.h"
+#include "rz-plugin/rzretdec.h"
+#include "rz-plugin/console/data_analysis.h"
 
 using namespace retdec::utils::io;
 
 namespace retdec {
-namespace r2plugin {
+namespace rzplugin {
 
 #define with(T, ...) ([]{ T ${}; __VA_ARGS__; return $; }())
 
@@ -83,7 +83,7 @@ RzCmdStatus DataAnalysisConsole::analyzeRange(RzCore *core, int argc, const char
 {
 	std::lock_guard<std::recursive_mutex> lock(mutex);
 	try {
-		R2Database info(*core);
+		RizinDatabase info(*core);
 		std::string cache = "";
 
 		common::AddressRange toAnalyze;
@@ -132,7 +132,7 @@ RzCmdStatus DataAnalysisConsole::analyzeWholeBinary(RzCore *core, int argc, cons
 {
 	std::lock_guard<std::recursive_mutex> lock(mutex);
 	try {
-		R2Database info(*core);
+		RizinDatabase info(*core);
 		auto config = createConfig(info, "whole");
 
 		auto [code, _] = decompile(config, false);

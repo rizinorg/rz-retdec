@@ -9,10 +9,10 @@
 #include <iostream>
 #include <regex>
 
-#include "r2plugin/console/console.h"
+#include "rz-plugin/console/console.h"
 
 namespace retdec {
-namespace r2plugin {
+namespace rzplugin {
 
 bool Console::Command::registerDesc(RzCmd* cmd, RzCmdDesc* parent, const std::string& prefix) const
 {

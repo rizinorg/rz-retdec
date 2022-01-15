@@ -3,12 +3,12 @@ if (NOT BUILD_BUNDLED_RETDEC)
 	find_package(retdec ${RETDEC_VERSION} REQUIRED COMPONENTS retdec config)
 endif()
 
-# RetDec r2plugin sources.
+# rz-retdec sources.
 set(SOURCES
-	r2retdec.cpp
-	r2data.cpp
-	r2utils.cpp
-	r2cgen.cpp
+	rzretdec.cpp
+	data.cpp
+	utils.cpp
+	cgen.cpp
 	console/console.cpp
 	console/data_analysis.cpp
 	console/decompiler.cpp
@@ -20,7 +20,7 @@ add_library(core_retdec SHARED ${SOURCES})
 set(CORE_LIBS
 	retdec::retdec
 	retdec::config
-	Rizin::librz
+	Rizin::Core
 )
 
 if (MSVC)
