@@ -1,0 +1,10 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: rz-retdec
+Upstream-Contact: RizinOrg <info@rizin.re>
+Source: https://github.com/rizinorg/rz-retdec
+
+Files: .github/** .gitignore CMakeLists.txt **/CMakeLists.txt doc/doxygen/** README.md *.cmake
+Copyright: 2022 RizinOrg <info@rizin.re>
+Copyright: 2020 Avast Software
+License: LGPL-3.0-only
+

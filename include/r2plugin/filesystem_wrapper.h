@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: 2020 Avast Software
+// SPDX-License-Identifier: LGPL-3.0-only
+
 /**
- * @file include/r2plugin/filesystem_wrapper.h
- * @brief Wrapper for conditional include of C++17 filesystem feature.
- * @copyright (c) 2020 Avast Software, licensed under the MIT license.
+ * @file
+ * @brief Wrapper for conditional include of C++17 filesystem feature
  */
 
 #ifndef R2PLUGIN_WRAPPERS_FILESYSTEM_H

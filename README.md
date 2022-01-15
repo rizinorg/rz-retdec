@@ -87,5 +87,5 @@ In the event that we accidentally failed to list a required notice,
 please bring it to our attention by contacting the repository owner.
 
 RetDec r2plugin uses the following third-party libraries or other resources:
-1) RetDec: https://github.com/avast/retdec Copyright (c) 2017 Avast Software, [MIT license](LICENSES/MIT.txt)
-2) retdec-r2plugin: https://github.com/avast/retdec-r2plugin Copyright (c) 2020 Avast Software, [MIT license](LICENSES/MIT.txt)
+1) RetDec: https://github.com/avast/retdec Copyright (c) 2017 Avast Software, MIT license
+2) retdec-r2plugin: https://github.com/avast/retdec-r2plugin Copyright (c) 2020 Avast Software, MIT license

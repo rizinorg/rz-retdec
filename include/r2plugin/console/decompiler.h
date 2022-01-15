@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: 2020 Avast Software
+// SPDX-License-Identifier: LGPL-3.0-only
+
 /**
- * @file include/r2plugin/console/decompiler.h
- * @brief implementation of decompiler console (pdz_).
- * @copyright (c) 2020 avast software, licensed under the mit license.
+ * @file
+ * @brief implementation of decompiler console (pdz_)
  */
 
 #pragma once

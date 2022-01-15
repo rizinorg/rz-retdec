@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: 2020 Avast Software
+// SPDX-License-Identifier: LGPL-3.0-only
+
 /**
- * @file include/cutter-plugin/core_plugin.h
+ * @file
  * @brief Main module of the retdec-cutter-plugin.
- * @copyright (c) 2020 Avast Software, licensed under the MIT license.
  */
 
 #ifndef RETDEC_R2PLUGIN_CORE_PLUGIN_H

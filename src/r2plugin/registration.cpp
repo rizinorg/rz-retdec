@@ -1,7 +1,8 @@
+// SPDX-FileCopyrightText: 2020 Avast Software
+// SPDX-License-Identifier: LGPL-3.0-only
+
 /**
- * @file src/r2plugin/registration.cpp
- * @brief Module that implements registration logic to r2 console.
- * @copyright (c) 2020 Avast Software, licensed under the MIT license.
+ * @brief Module that implements registration logic to r2 console
  */
 
 #include <mutex>

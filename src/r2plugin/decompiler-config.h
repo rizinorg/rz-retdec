@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: 2020 Avast Software
+// SPDX-License-Identifier: LGPL-3.0-only
+
 /**
- * @file src/r2plugin/decompiler-config.h
- * @brief Provides default decompiler configuration.
- * @copyright (c) 2020 Avast Software, licensed under the MIT license.
+ * @file
+ * @brief Provides default decompiler configuration
  */
 
 #pragma once

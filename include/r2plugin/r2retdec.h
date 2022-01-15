@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: 2020 Avast Software
+// SPDX-License-Identifier: LGPL-3.0-only
+
 /**
- * @file include/r2plugin/r2retdec.h
+ * @file
  * @brief Main module of the retdec-r2plugin.
- * @copyright (c) 2020 Avast Software, licensed under the MIT license.
  */
 
 #ifndef R2PLUGIN_R2RETDEC_H

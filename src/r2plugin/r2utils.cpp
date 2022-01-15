@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: 2020 Avast Software
+// SPDX-License-Identifier: LGPL-3.0-only
+
 /**
- * @file src/r2plugin/r2utils.cpp
+ * @file
  * @brief Specific output format utilities.
- * @copyright (c) 2020 Avast Software, licensed under the MIT license.
  */
 
 #include <algorithm>

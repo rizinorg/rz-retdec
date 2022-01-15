@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: 2020 Avast Software
+// SPDX-License-Identifier: LGPL-3.0-only
+
 /**
- * @file include/r2plugin/r2data.h
- * @brief Information gathering from R2 and user.
- * @copyright (c) 2020 Avast Software, licensed under the MIT license.
+ * @file
+ * @brief Information gathering from Rizin and user
  */
 
 #ifndef RETDEC_R2PLUGIN_R2_INFO_H

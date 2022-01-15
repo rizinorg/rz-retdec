@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: 2020 Avast Software
+// SPDX-License-Identifier: LGPL-3.0-only
+
 /**
- * @file include/r2plugin/r2cgen.h
- * @brief C code generation and token marking.
- * @copyright (c) 2020 Avast Software, licensed under the MIT license.
+ * @file
+ * @brief C code generation and token marking
  */
 
 #ifndef RETDEC_R2PLUGIN_R2CGEN_H

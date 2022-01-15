@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2020 Avast Software
+// SPDX-License-Identifier: LGPL-3.0-only
+
 #include <algorithm>
 #include <cstring>
 #include <functional>

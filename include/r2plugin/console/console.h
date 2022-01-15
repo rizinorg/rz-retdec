@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: 2020 Avast Software
+// SPDX-License-Identifier: LGPL-3.0-only
+
 /**
- * @file include/r2plugin/console/console.h
- * @brief R2 include interface.
- * @copyright (c) 2020 Avast Software, licensed under the MIT license.
+ * @file
+ * @brief Rizin include interface
  */
 
 #pragma once

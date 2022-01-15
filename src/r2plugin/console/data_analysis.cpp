@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: 2020 Avast Software
+// SPDX-License-Identifier: LGPL-3.0-only
+
 /**
- * @file src/r2plugin/console/data_analysis.cpp
- * @brief Implementation of data analysis console (pdza_).
- * @copyright (c) 2020 Avast Software, licensed under the MIT license.
+ * @file
+ * @brief Implementation of data analysis console (pdza_)
  */
 
 #include <iostream>

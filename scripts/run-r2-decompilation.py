@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2020 Avast Software
+# SPDX-License-Identifier: LGPL-3.0-only
 
 """The script decompiles the given file via RetDec R2 plugin.
 The supported decompilation modes are:
