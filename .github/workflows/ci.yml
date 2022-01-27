@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - dev
+      - 'test-*'
+
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+          sudo apt-get -y install ninja-build
+          echo "meson==0.61.1 --hash=sha256:81113785106d485e38d85b92169dca112e6e077880731ac37d29fc9898e1efb5" > requirements.txt
+          sudo pip3 install -r requirements.txt # ubuntu meson is too old
+      - name: Build and install rizin
+        run: |
+          git clone https://github.com/rizinorg/rizin
+          cd rizin
+          meson build --prefix=/usr
+          ninja -C build
+          sudo ninja -C build install
+      - name: Build rz-retdec
+        run: |
+          cmake -Bbuild -GNinja -DCMAKE_INSTALL_PREFIX=$HOME/.local
+          ninja -C build
+          ninja -C build install
