@@ -1,4 +1,6 @@
-# RetDec Rizin plugin
+<img width="150" height="150" align="left" style="float: left; margin: 0 10px 0 0;" alt="rz-retdec logo" src="https://raw.githubusercontent.com/rizinorg/rz-retdec/dev/doc/rz-retdec.svg">
+
+# rz-retdec
 
 RetDec plugin for [Rizin](https://github.com/rizinorg/rizin).
 
