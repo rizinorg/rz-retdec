@@ -15,6 +15,8 @@
 #include "rz-plugin/data.h"
 #include "filesystem_wrapper.h"
 
+#include <mutex>
+
 namespace retdec {
 namespace rzplugin {
 

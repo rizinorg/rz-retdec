@@ -45,9 +45,9 @@ public:
 
 	/// Concrete Command Group that contains the Commands of its contained console.
 	struct CommandGroup : public CommandDesc {
-		const Console const* subconsole;
+		const Console * const subconsole;
 	public:
-		CommandGroup(const Console const* subconsole)
+		CommandGroup(const Console * const subconsole)
 			: subconsole(subconsole) {}
 		bool registerDesc(RzCmd* cmd, RzCmdDesc* parent, const std::string& prefix) const override;
 	};
