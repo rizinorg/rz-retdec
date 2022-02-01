@@ -150,8 +150,9 @@ const std::string FormatUtils::convertTypeToLlvm(const RzTypeDB *tdb, const RzTy
 		return "void";
 	}
 	const std::string &ctype(typestr);
+	std::string r = convertTypeToLlvm(typestr);
 	rz_mem_free(typestr);
-	return convertTypeToLlvm(typestr);
+	return r;
 }
 
 const std::string FormatUtils::convertTypeToLlvm(const std::string &ctype)

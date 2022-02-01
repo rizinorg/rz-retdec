@@ -373,6 +373,7 @@ void RizinDatabase::fetchExtraArgsData(ObjectSequentialContainer &args, RzAnalys
 		}
 		rz_list_free (list);
 	}
+	rz_mem_free(key);
 }
 
 /**
@@ -403,6 +404,8 @@ void RizinDatabase::fetchFunctionReturnType(Function &function, RzAnalysisFuncti
 
 	if (auto returnType = rz_type_func_ret(_r2core.analysis->typedb, key))
 		function.returnType = Type(fu::convertTypeToLlvm(_r2core.analysis->typedb, returnType));
+
+	rz_mem_free(key);
 }
 
 /**
