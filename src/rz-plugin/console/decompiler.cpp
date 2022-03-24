@@ -11,7 +11,7 @@
 #include "rz-plugin/console/decompiler.h"
 #include "rz-plugin/console/data_analysis.h"
 
-#define CMD_PREFIX "pdz" /**< Plugin activation command in r2 console.**/
+#define CMD_PREFIX "pdz" /**< Plugin activation command in rizin console.**/
 
 using namespace retdec::utils::io;
 
