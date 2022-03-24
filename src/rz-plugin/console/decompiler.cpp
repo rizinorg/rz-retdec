@@ -64,7 +64,7 @@ const Console::Command DecompilerConsole::DecompileJsonCurrent = {
 
 const Console::Command DecompilerConsole::DecompileCommentCurrent = {
 	with(RzCmdDescHelp,
-		$.summary = "Return decompilation of current function to r2 as comment.";
+		$.summary = "Return decompilation of current function to rizin as comment.";
 		$.args = args_none
 	),
 	DecompilerConsole::decompileCommentCurrent
