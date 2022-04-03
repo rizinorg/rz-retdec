@@ -16,13 +16,12 @@ set(SOURCES
 )
 
 add_library(core_retdec SHARED ${SOURCES})
+target_link_libraries(core_retdec PUBLIC retdec::config) # include dirs from here are used by the cutter plugin
 
 set(CORE_LIBS
 	retdec::retdec
-	retdec::config
 	Rizin::Core
 )
-
 if (MSVC)
 	list(APPEND CORE_LIBS
 		retdec::bin2llvmir -WHOLEARCHIVE:$<TARGET_FILE_NAME:retdec::bin2llvmir>
@@ -55,7 +54,6 @@ else ()
 		-Wl,--whole-archive retdec::llvmir2hll -Wl,--no-whole-archive
 	)
 endif()
-
 find_library(STD_CPP_FS stdc++fs)
 if (STD_CPP_FS)
 	message("-- Linking with ${STD_CPP_FS} library")
@@ -65,8 +63,7 @@ if (STD_CPP_FS)
 else()
 	message("-- Library stdc++fs NOT FOUND -> linking core_retdec without stdc++fs library")
 endif()
-
-target_link_libraries(core_retdec ${CORE_LIBS})
+target_link_libraries(core_retdec PRIVATE ${CORE_LIBS})
 
 target_include_directories(core_retdec PUBLIC ${PROJECT_SOURCE_DIR}/include/)
 

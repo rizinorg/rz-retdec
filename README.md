@@ -39,6 +39,7 @@ This section describes a local build and installation of rz-retdec.
 * A compiler supporting c++17
 * CMake (version >= 3.6)
 * Existing Rizin installation
+* Optional for Cutter: Existing Cutter installation
 
 To build the bundled version of RetDec see [RetDec requirements section](https://github.com/avast/retdec#requirements).
 
@@ -58,7 +59,7 @@ You have to pass the following parameters to `cmake`:
 You can pass the following additional parameters to `cmake`:
 * `-DBUILD_BUNDLED_RETDEC=ON` to build bundled RetDec version with the plugin. The build of the bundled RetDec is by default turned on. RetDec will be installed to `CMAKE_INSTALL_PREFIX`. When turned OFF system is searched for RetDec installation.
 * `-DRZ_RETDEC_DOC=OFF` optional parameter to build Doxygen documentation.
-* `-DBUILD_CUTTER_PLUGIN=OFF` setting to ON will build the Cutter plugin. Cutter must be built with support for plugin loading, see [Cutter documentation](https://cutter.re/docs/plugins.html).
+* `-DBUILD_CUTTER_PLUGIN=OFF` setting to ON will build the Cutter plugin. This requires a cutter installation to be available. If it is not found automatically, you can pass the prefix with `-DCMAKE_PREFIX_PATH=/path/to/cutter/prefix`.
 
 *Note*: rz-retdec requires [filesystem](https://en.cppreference.com/w/cpp/filesystem) library to be linked with the plugin. CMake will try to find the library in the system but on GCC 7 it might not be able to do so automatically. In that case you must specify a path where this library is located in the system to the cmake by adding:
 * `-DCMAKE_LIBRARY_PATH=${PATH_TO_FILESTSTEM_DIR}`

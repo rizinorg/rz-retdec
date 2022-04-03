@@ -15,26 +15,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt5 REQUIRED COMPONENTS Widgets)
+add_library(retdec_cutter MODULE ${SOURCE})
+target_include_directories(retdec_cutter PUBLIC ${PROJECT_SOURCE_DIR}/include/)
+target_link_libraries(retdec_cutter PUBLIC core_retdec Cutter::Cutter)
 
-add_library(r2retdec_cutter SHARED ${SOURCE})
-
-get_property(CORE_LIBS GLOBAL PROPERTY R2RETDEC_CORE_LIBS)
-
-target_link_libraries(r2retdec_cutter
-	${CORE_LIBS}
-	Qt5::Widgets
-	Rizin::Core
-	Cutter::Cutter
-)
-
-target_include_directories(r2retdec_cutter PUBLIC ${PROJECT_SOURCE_DIR}/include/)
-
-if(APPLE)
-	target_link_options(r2retdec_cutter PRIVATE -undefined dynamic_lookup)
-
-elseif(WIN32)
-	target_link_options(r2retdec_cutter PRIVATE -FORCE:UNRESOLVED)
-endif()
-
-install(TARGETS r2retdec_cutter DESTINATION "${CUTTER_INSTALL_PLUGDIR}")
+install(TARGETS retdec_cutter DESTINATION "${CUTTER_INSTALL_PLUGDIR}")

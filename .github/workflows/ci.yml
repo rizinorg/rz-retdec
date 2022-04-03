@@ -15,6 +15,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install dependencies
         run: |
+          sudo apt-get update
           sudo apt-get -y install ninja-build qt5-default
           echo "meson==0.61.1 --hash=sha256:81113785106d485e38d85b92169dca112e6e077880731ac37d29fc9898e1efb5" > requirements.txt
           sudo pip3 install -r requirements.txt # ubuntu meson is too old
@@ -23,6 +24,13 @@ jobs:
           git clone https://github.com/rizinorg/rizin
           cd rizin
           meson build --prefix=/usr
+          ninja -C build
+          sudo ninja -C build install
+      - name: Build and install cutter
+        run: |
+          git clone https://github.com/rizinorg/cutter
+          cd cutter
+          cmake -Bbuild -GNinja -DCUTTER_USE_BUNDLED_RIZIN=OFF -DCMAKE_INSTALL_PREFIX=/usr
           ninja -C build
           sudo ninja -C build install
       - name: Build rz-retdec
