@@ -72,6 +72,4 @@ set_target_properties(core_retdec PROPERTIES
 	PREFIX ""
 )
 
-set_property(GLOBAL PROPERTY R2RETDEC_CORE_LIBS ${CORE_LIBS})
-
 install(TARGETS core_retdec DESTINATION "${RIZIN_INSTALL_PLUGDIR}")
