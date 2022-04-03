@@ -28,7 +28,7 @@ jobs:
           sudo ninja -C build install
       - name: Build and install cutter
         run: |
-          git clone https://github.com/rizinorg/cutter
+          git clone --recursive https://github.com/rizinorg/cutter
           cd cutter
           cmake -Bbuild -GNinja -DCUTTER_USE_BUNDLED_RIZIN=OFF -DCMAKE_INSTALL_PREFIX=/usr
           ninja -C build
