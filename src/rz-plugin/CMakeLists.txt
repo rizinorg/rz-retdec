@@ -18,10 +18,11 @@ set(SOURCES
 add_library(core_retdec SHARED ${SOURCES})
 target_link_libraries(core_retdec PUBLIC retdec::config) # include dirs from here are used by the cutter plugin
 
-set(CORE_LIBS
-	retdec::retdec
-	Rizin::Core
-)
+set(CORE_LIBS Rizin::Core)
+if (UNIX AND NOT APPLE)
+	list(APPEND CORE_LIBS -Wl,-Bsymbolic)
+endif()
+list(APPEND CORE_LIBS retdec::retdec)
 if (MSVC)
 	list(APPEND CORE_LIBS
 		retdec::bin2llvmir -WHOLEARCHIVE:$<TARGET_FILE_NAME:retdec::bin2llvmir>
