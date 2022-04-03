@@ -63,9 +63,12 @@ if (RZ_RETDEC_DOC)
 endif()
 
 find_package(Rizin REQUIRED Core)
-
 set(RIZIN_INSTALL_PLUGDIR "${Rizin_PLUGINDIR}" CACHE STRING "Directory to install rizin plugins into")
-set(CUTTER_INSTALL_PLUGDIR "share/rizin/cutter/plugins/native" CACHE STRING "Directory to install Cutter plugin into")
+
+if (BUILD_CUTTER_PLUGIN)
+	find_package(Cutter REQUIRED)
+	set(CUTTER_INSTALL_PLUGDIR "${Cutter_USER_PLUGINDIR}" CACHE STRING "Directory to install Cutter plugin into")
+endif()
 
 if (RETDEC_INSTALL_PREFIX)
 	if (NOT IS_ABSOLUTE "${RIZIN_INSTALL_PLUGDIR}")
