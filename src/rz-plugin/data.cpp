@@ -238,7 +238,7 @@ void RizinDatabase::fetchGlobals(Config &config) const
 		// Sometimes when setting flag, the type automatically is set to FUNC.
 		if (bind == "GLOBAL" && (type == "FUNC" || type == "OBJ")) {
 			if (config.functions.count(name) || config.functions.count("imp."+name)
-					|| sym->vaddr == 0) {
+					|| sym->vaddr == 0 || sym->vaddr == UT64_MAX) {
 				// This is a function, not a global variable.
 				continue;
 			}
