@@ -64,7 +64,7 @@ void RizinDatabase::setFunction(const common::Function &fnc) const
 	auto r2fnc = rz_analysis_get_function_at(_r2core.analysis, fnc.getStart().getValue());
 	if (r2fnc == nullptr) {
 		r2fnc = rz_analysis_create_function(_r2core.analysis, fnc.getName().c_str(),
-				fnc.getStart().getValue(), RZ_ANALYSIS_FCN_TYPE_FCN, nullptr);
+				fnc.getStart().getValue(), RZ_ANALYSIS_FCN_TYPE_FCN);
 		if (r2fnc == nullptr) {
 			throw DecompilationError("Unable to create function on address "
 					+ std::to_string(fnc.getStart().getValue()));
@@ -72,7 +72,7 @@ void RizinDatabase::setFunction(const common::Function &fnc) const
 	}
 
 	if (!fnc.isDynamicallyLinked() && fnc.getSize().getValue() > 1)
-		if (!rz_analysis_fcn_add_bb(_r2core.analysis, r2fnc, fnc.getStart().getValue(), fnc.getSize().getValue(), UT64_MAX, UT64_MAX, nullptr))
+		if (!rz_analysis_fcn_add_bb(_r2core.analysis, r2fnc, fnc.getStart().getValue(), fnc.getSize().getValue(), UT64_MAX, UT64_MAX))
 			Log::error() << Log::Warning << "unable to add basic block of " << fnc.getName() << std::endl;
 
 	copyFunctionData(fnc, *r2fnc);
