@@ -299,55 +299,53 @@ Function RizinDatabase::convertFunctionObject(RzAnalysisFunction &r2fnc) const
  * This is not, however, projected into function's calling convention and the args are needed to
  * be fetched with stack variables of the funciton.
  */
-void RizinDatabase::fetchFunctionLocalsAndArgs(Function &function, RzAnalysisFunction &r2fnc) const
+void RizinDatabase::fetchFunctionLocalsAndArgs(Function &function, RzAnalysisFunction &rzfnc) const
 {
 	ObjectSetContainer locals;
-	ObjectSequentialContainer r2args, r2userArgs;
+	ObjectSequentialContainer rzargs, rzuserArgs;
 
-	auto list = rz_analysis_var_all_list(_r2core.analysis, &r2fnc);
-	if (list != nullptr) {
-		for (RzListIter *it = list->head; it; it = it->n) {
-			auto locvar = reinterpret_cast<RzAnalysisVar*>(it->data);
-			if (locvar == nullptr)
-				continue;
+	void **it;
+	rz_pvector_foreach(&rzfnc.vars, it) {
+		auto locvar = reinterpret_cast<RzAnalysisVar *>(*it);
+		if (locvar == nullptr)
+			continue;
 
-			Storage variableStorage;
-			switch (locvar->kind) {
-			case RZ_ANALYSIS_VAR_KIND_REG: {
-				variableStorage = Storage::inRegister(locvar->regname);
-			}
-			break;
-			case RZ_ANALYSIS_VAR_KIND_SPV:
-			case RZ_ANALYSIS_VAR_KIND_BPV: {
-				int stackOffset = locvar->delta;
-				// Execute extra pop to match RetDec offset base.
-				// extra POP x86: 8 -> 4 (x64: 8 -> 0)
-				stackOffset -= fetchWordSize()/8;
-				variableStorage = Storage::onStack(stackOffset);
-			}
-			break;
-			default:
-				continue;
-			};
-
-			Object var(locvar->name, variableStorage);
-			var.type = Type(fu::convertTypeToLlvm(_r2core.analysis->typedb, locvar->type));
-			var.setRealName(locvar->name);
-
-			// If variable is argument it is a local variable too.
-			if (locvar->isarg)
-				r2args.push_back(var);
-
-			locals.insert(var);
+		Storage variableStorage;
+		switch (locvar->kind) {
+		case RZ_ANALYSIS_VAR_KIND_REG: {
+			variableStorage = Storage::inRegister(locvar->regname);
 		}
+		break;
+		case RZ_ANALYSIS_VAR_KIND_SPV:
+		case RZ_ANALYSIS_VAR_KIND_BPV: {
+			int stackOffset = locvar->delta;
+			// Execute extra pop to match RetDec offset base.
+			// extra POP x86: 8 -> 4 (x64: 8 -> 0)
+			stackOffset -= fetchWordSize()/8;
+			variableStorage = Storage::onStack(stackOffset);
+		}
+		break;
+		default:
+			continue;
+		};
+
+		Object var(locvar->name, variableStorage);
+		var.type = Type(fu::convertTypeToLlvm(_r2core.analysis->typedb, locvar->type));
+		var.setRealName(locvar->name);
+
+		// If variable is argument it is a local variable too.
+		if (locvar->isarg)
+			rzargs.push_back(var);
+
+		locals.insert(var);
 	}
 
-	fetchExtraArgsData(r2userArgs, r2fnc);
+	fetchExtraArgsData(rzuserArgs, rzfnc);
 
 	function.locals = locals;
 
 	// User spevcified arguments must have higher priority
-	function.parameters = r2userArgs.empty() ? r2args : r2userArgs;
+	function.parameters = rzuserArgs.empty() ? rzargs : rzuserArgs;
 }
 
 /**
