@@ -17,7 +17,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get -y install ninja-build qt5-default libqt5svg5-dev qttools5-dev
+          sudo apt-get -y install ninja-build qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5svg5-dev qttools5-dev
           echo "meson==0.61.1 --hash=sha256:81113785106d485e38d85b92169dca112e6e077880731ac37d29fc9898e1efb5" > requirements.txt
           sudo pip3 install -r requirements.txt # ubuntu meson is too old
       - name: Build and install rizin
