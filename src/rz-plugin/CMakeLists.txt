@@ -18,7 +18,7 @@ set(SOURCES
 add_library(core_retdec SHARED ${SOURCES})
 target_link_libraries(core_retdec PUBLIC retdec::config) # include dirs from here are used by the cutter plugin
 
-set(CORE_LIBS Rizin::Core)
+set(CORE_LIBS)
 if (UNIX AND NOT APPLE)
 	list(APPEND CORE_LIBS -Wl,-Bsymbolic)
 endif()
@@ -27,6 +27,7 @@ if (MSVC)
 	list(APPEND CORE_LIBS
 		retdec::bin2llvmir -WHOLEARCHIVE:$<TARGET_FILE_NAME:retdec::bin2llvmir>
 		retdec::llvmir2hll -WHOLEARCHIVE:$<TARGET_FILE_NAME:retdec::llvmir2hll>
+		retdec::llvmir2hll -WHOLEARCHIVE:$<TARGET_FILE_NAME:retdec::deps::capstone>
 	)
 
 	set_property(TARGET core_retdec
@@ -48,11 +49,13 @@ elseif (APPLE)
 	list(APPEND CORE_LIBS
 		-Wl,-force_load retdec::bin2llvmir
 		-Wl,-force_load retdec::llvmir2hll
+		-Wl,-force_load retdec::deps::capstone
 	)
 else ()
 	list(APPEND CORE_LIBS
 		-Wl,--whole-archive retdec::bin2llvmir -Wl,--no-whole-archive
 		-Wl,--whole-archive retdec::llvmir2hll -Wl,--no-whole-archive
+		-Wl,--whole-archive retdec::deps::capstone -Wl,--no-whole-archive
 	)
 endif()
 find_library(STD_CPP_FS stdc++fs)
@@ -64,7 +67,9 @@ if (STD_CPP_FS)
 else()
 	message("-- Library stdc++fs NOT FOUND -> linking core_retdec without stdc++fs library")
 endif()
-target_link_libraries(core_retdec PRIVATE ${CORE_LIBS})
+# Rizin::Core must be last to ensure symbols like cs_disasm_* are loaded from retdec's
+# capstone instead of librz_asm on macOS.
+target_link_libraries(core_retdec PRIVATE ${CORE_LIBS} Rizin::Core)
 
 target_include_directories(core_retdec PUBLIC ${PROJECT_SOURCE_DIR}/include/)
 
