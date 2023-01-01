@@ -21,7 +21,7 @@ using retdec::utils::io::Log;
  * Translation map between tokens representing calling convention type returned
  * by Radare2 and CallingConventionID that is recognized by RetDec.
  */
-std::map<const std::string, const CallingConventionID> RizinDatabase::_r2rdcc = {
+std::map<const std::string, const CallingConventionID> RizinDatabase::_rzrdcc = {
 	{"arm32", CallingConventionID::CC_ARM},
 	{"arm64", CallingConventionID::CC_ARM64},
 
@@ -43,7 +43,7 @@ std::map<const std::string, const CallingConventionID> RizinDatabase::_r2rdcc = 
 };
 
 RizinDatabase::RizinDatabase(RzCore &core):
-	_r2core(core)
+	_rzcore(core)
 {
 }
 
@@ -52,30 +52,30 @@ RizinDatabase::RizinDatabase(RzCore &core):
  */
 std::string RizinDatabase::fetchFilePath() const
 {
-	if (rz_pvector_empty(&_r2core.file->binfiles)) {
+	if (rz_pvector_empty(&_rzcore.file->binfiles)) {
 		return std::string();
 	}
-	RzBinFile *bf = reinterpret_cast<RzBinFile *>(rz_pvector_at(&_r2core.file->binfiles, 0));
+	RzBinFile *bf = reinterpret_cast<RzBinFile *>(rz_pvector_at(&_rzcore.file->binfiles, 0));
 	return bf->file ? std::string(bf->file) : "";
 }
 
 void RizinDatabase::setFunction(const common::Function &fnc) const
 {
-	auto r2fnc = rz_analysis_get_function_at(_r2core.analysis, fnc.getStart().getValue());
-	if (r2fnc == nullptr) {
-		r2fnc = rz_analysis_create_function(_r2core.analysis, fnc.getName().c_str(),
+	auto rzfnc = rz_analysis_get_function_at(_rzcore.analysis, fnc.getStart().getValue());
+	if (rzfnc == nullptr) {
+		rzfnc = rz_analysis_create_function(_rzcore.analysis, fnc.getName().c_str(),
 				fnc.getStart().getValue(), RZ_ANALYSIS_FCN_TYPE_FCN);
-		if (r2fnc == nullptr) {
+		if (rzfnc == nullptr) {
 			throw DecompilationError("Unable to create function on address "
 					+ std::to_string(fnc.getStart().getValue()));
 		}
 	}
 
 	if (!fnc.isDynamicallyLinked() && fnc.getSize().getValue() > 1)
-		if (!rz_analysis_fcn_add_bb(_r2core.analysis, r2fnc, fnc.getStart().getValue(), fnc.getSize().getValue(), UT64_MAX, UT64_MAX))
+		if (!rz_analysis_fcn_add_bb(_rzcore.analysis, rzfnc, fnc.getStart().getValue(), fnc.getSize().getValue(), UT64_MAX, UT64_MAX))
 			Log::error() << Log::Warning << "unable to add basic block of " << fnc.getName() << std::endl;
 
-	copyFunctionData(fnc, *r2fnc);
+	copyFunctionData(fnc, *rzfnc);
 }
 
 std::string sanitize(const std::string& a)
@@ -88,9 +88,9 @@ std::string sanitize(const std::string& a)
 	return ok.str();
 }
 
-void RizinDatabase::copyFunctionData(const common::Function &fnc, RzAnalysisFunction &r2fnc) const
+void RizinDatabase::copyFunctionData(const common::Function &fnc, RzAnalysisFunction &rzfnc) const
 {
-	if (rz_analysis_function_rename(&r2fnc, fnc.getName().c_str()) == false) {
+	if (rz_analysis_function_rename(&rzfnc, fnc.getName().c_str()) == false) {
 		std::ostringstream err;
 		err << "unable to set rename function at offset "
 			<< std::hex << fnc.getStart() << ": new name \"" << fnc.getName();
@@ -105,7 +105,7 @@ void RizinDatabase::copyFunctionData(const common::Function &fnc, RzAnalysisFunc
 	//     Sanitization will check for symbols that r2 cannot parse and replace them with
 	//     more appropriate symbols.
 	if (false && !fnc.getDeclarationString().empty()) {
-		rz_analysis_str_to_fcn(_r2core.analysis, &r2fnc, (fnc.getDeclarationString()+";").c_str());
+		rz_analysis_str_to_fcn(_rzcore.analysis, &rzfnc, (fnc.getDeclarationString()+";").c_str());
 	}
 	else {
 		std::ostringstream data;
@@ -121,7 +121,7 @@ void RizinDatabase::copyFunctionData(const common::Function &fnc, RzAnalysisFunc
 				<< " " << a.getName();
 		}
 		data << ");";
-		rz_analysis_str_to_fcn(_r2core.analysis, &r2fnc, sanitize(data.str()).c_str());
+		rz_analysis_str_to_fcn(_rzcore.analysis, &rzfnc, sanitize(data.str()).c_str());
 	}
 #endif
 }
@@ -140,7 +140,7 @@ void RizinDatabase::setFunctions(const config::Config& config) const
  */
 Function RizinDatabase::fetchFunction(ut64 addr) const
 {
-	RzAnalysisFunction *cf = rz_analysis_get_fcn_in(_r2core.analysis, addr, RZ_ANALYSIS_FCN_TYPE_NULL);
+	RzAnalysisFunction *cf = rz_analysis_get_fcn_in(_rzcore.analysis, addr, RZ_ANALYSIS_FCN_TYPE_NULL);
 	if (cf == nullptr) {
 		std::ostringstream errMsg;
 		errMsg << "no function at offset 0x" << std::hex << addr;
@@ -152,7 +152,7 @@ Function RizinDatabase::fetchFunction(ut64 addr) const
 
 Function RizinDatabase::fetchSeekedFunction() const
 {
-	return fetchFunction(_r2core.offset);
+	return fetchFunction(_rzcore.offset);
 }
 
 /**
@@ -160,7 +160,7 @@ Function RizinDatabase::fetchSeekedFunction() const
  */
 void RizinDatabase::fetchFunctionsAndGlobals(Config &rconfig) const
 {
-	auto list = rz_analysis_get_fcns(_r2core.analysis);
+	auto list = rz_analysis_get_fcns(_rzcore.analysis);
 	if (list != nullptr) {
 		FunctionContainer functions;
 		for (RzListIter *it = list->head; it; it = it->n) {
@@ -197,7 +197,7 @@ void RizinDatabase::fetchFunctionsAndGlobals(Config &rconfig) const
  */
 void RizinDatabase::fetchGlobals(Config &config) const
 {
-	RzBinObject *obj = rz_bin_cur_object(_r2core.bin);
+	RzBinObject *obj = rz_bin_cur_object(_rzcore.bin);
 	if (obj == nullptr || obj->symbols == nullptr)
 		return;
 
@@ -243,7 +243,7 @@ void RizinDatabase::fetchGlobals(Config &config) const
 				continue;
 			}
 			// Flags will contain custom name set by user.
-			RzFlagItem* flag = rz_flag_get_i(_r2core.flags, sym->vaddr);
+			RzFlagItem* flag = rz_flag_get_i(_rzcore.flags, sym->vaddr);
 			if (flag) {
 				name = flag->name;
 			}
@@ -270,19 +270,19 @@ void RizinDatabase::fetchGlobals(Config &config) const
  * Converts function object from its representation in Radare2 into
  * represnetation that is used in RetDec.
  */
-Function RizinDatabase::convertFunctionObject(RzAnalysisFunction &r2fnc) const
+Function RizinDatabase::convertFunctionObject(RzAnalysisFunction &rzfnc) const
 {
-	auto start = rz_analysis_function_min_addr(&r2fnc);
-	auto end = rz_analysis_function_max_addr(&r2fnc);
+	auto start = rz_analysis_function_min_addr(&rzfnc);
+	auto end = rz_analysis_function_max_addr(&rzfnc);
 
-	auto name = fu::stripName(r2fnc.name);
+	auto name = fu::stripName(rzfnc.name);
 
 	Function function(start, end, name);
 
 	function.setIsUserDefined();
-	fetchFunctionReturnType(function, r2fnc);
-	fetchFunctionCallingconvention(function, r2fnc);
-	fetchFunctionLocalsAndArgs(function, r2fnc);
+	fetchFunctionReturnType(function, rzfnc);
+	fetchFunctionCallingconvention(function, rzfnc);
+	fetchFunctionLocalsAndArgs(function, rzfnc);
 
 	return function;
 }
@@ -295,7 +295,7 @@ Function RizinDatabase::convertFunctionObject(RzAnalysisFunction &r2fnc) const
  * local variables.
  *
  * When user do not provide argument for a function and the function has calling convention
- * that does not use registers (cdecl), the aruments are are deducted in r2 based on the offset.
+ * that does not use registers (cdecl), the aruments are are deducted in rizin based on the offset.
  * This is not, however, projected into function's calling convention and the args are needed to
  * be fetched with stack variables of the funciton.
  */
@@ -330,7 +330,7 @@ void RizinDatabase::fetchFunctionLocalsAndArgs(Function &function, RzAnalysisFun
 		};
 
 		Object var(locvar->name, variableStorage);
-		var.type = Type(fu::convertTypeToLlvm(_r2core.analysis->typedb, locvar->type));
+		var.type = Type(fu::convertTypeToLlvm(_rzcore.analysis->typedb, locvar->type));
 		var.setRealName(locvar->name);
 
 		// If variable is argument it is a local variable too.
@@ -351,22 +351,22 @@ void RizinDatabase::fetchFunctionLocalsAndArgs(Function &function, RzAnalysisFun
 /**
  * @brief Fetches function arguments defined by user.
  */
-void RizinDatabase::fetchExtraArgsData(ObjectSequentialContainer &args, RzAnalysisFunction &r2fnc) const
+void RizinDatabase::fetchExtraArgsData(ObjectSequentialContainer &args, RzAnalysisFunction &rzfnc) const
 {
 	RzAnalysisFuncArg *arg;
 
-	char* key = resolve_fcn_name(_r2core.analysis, r2fnc.name);
-	if (!key || !_r2core.analysis || !_r2core.analysis->typedb)
+	char* key = resolve_fcn_name(_rzcore.analysis, rzfnc.name);
+	if (!key || !_rzcore.analysis || !_rzcore.analysis->typedb)
 		return;
 
-	int nargs = rz_type_func_args_count(_r2core.analysis->typedb, key);
+	int nargs = rz_type_func_args_count(_rzcore.analysis->typedb, key);
 	if (nargs) {
-		RzList *list = rz_core_get_func_args(&_r2core, r2fnc.name);
+		RzList *list = rz_core_get_func_args(&_rzcore, rzfnc.name);
 		for (RzListIter *it = list->head; it; it = it->n) {
 			arg = reinterpret_cast<RzAnalysisFuncArg*>(it->data);
 			Object var(arg->name, Storage::undefined());
 			var.setRealName(arg->name);
-			var.type = Type(fu::convertTypeToLlvm(_r2core.analysis->typedb, arg->orig_c_type));
+			var.type = Type(fu::convertTypeToLlvm(_rzcore.analysis->typedb, arg->orig_c_type));
 			args.push_back(var);
 		}
 		rz_list_free (list);
@@ -377,11 +377,11 @@ void RizinDatabase::fetchExtraArgsData(ObjectSequentialContainer &args, RzAnalys
 /**
  * @brief Fetches the calling convention of the input function from Radare2.
  */
-void RizinDatabase::fetchFunctionCallingconvention(Function &function, RzAnalysisFunction &r2fnc) const
+void RizinDatabase::fetchFunctionCallingconvention(Function &function, RzAnalysisFunction &rzfnc) const
 {
-	if (r2fnc.cc != nullptr) {
-		if (_r2rdcc.count(r2fnc.cc)) {
-			function.callingConvention = _r2rdcc[r2fnc.cc];
+	if (rzfnc.cc != nullptr) {
+		if (_rzrdcc.count(rzfnc.cc)) {
+			function.callingConvention = _rzrdcc[rzfnc.cc];
 			return;
 		}
 	}
@@ -392,16 +392,16 @@ void RizinDatabase::fetchFunctionCallingconvention(Function &function, RzAnalysi
 /**
  * @brief Fetches the return type of the input function from Radare2.
  */
-void RizinDatabase::fetchFunctionReturnType(Function &function, RzAnalysisFunction &r2fnc) const
+void RizinDatabase::fetchFunctionReturnType(Function &function, RzAnalysisFunction &rzfnc) const
 {
 	function.returnType = Type("void");
-	char* key = resolve_fcn_name(_r2core.analysis, r2fnc.name);
+	char* key = resolve_fcn_name(_rzcore.analysis, rzfnc.name);
 
-	if (!key || !_r2core.analysis || !_r2core.analysis->typedb)
+	if (!key || !_rzcore.analysis || !_rzcore.analysis->typedb)
 		return;
 
-	if (auto returnType = rz_type_func_ret(_r2core.analysis->typedb, key))
-		function.returnType = Type(fu::convertTypeToLlvm(_r2core.analysis->typedb, returnType));
+	if (auto returnType = rz_type_func_ret(_rzcore.analysis->typedb, key))
+		function.returnType = Type(fu::convertTypeToLlvm(_rzcore.analysis->typedb, returnType));
 
 	rz_mem_free(key);
 }
@@ -411,15 +411,15 @@ void RizinDatabase::fetchFunctionReturnType(Function &function, RzAnalysisFuncti
  */
 size_t RizinDatabase::fetchWordSize() const
 {
-	return rz_config_get_i(_r2core.config, "asm.bits");
+	return rz_config_get_i(_rzcore.config, "asm.bits");
 }
 
 ut64 RizinDatabase::seekedAddress() const
 {
-	return _r2core.offset;
+	return _rzcore.offset;
 }
 
 const RzCore& RizinDatabase::core() const
 {
-	return _r2core;
+	return _rzcore;
 }

@@ -353,7 +353,7 @@ EOF
 CMDS=<<EOF
 aaa
 
-# TODO: remove these when rz can do it automatically
+# TODO: remove these when rizin can do it automatically
 afvr rdi format "const char *" @ sym.imp.printf
 afvr rdi size size_t @ sym.imp.malloc
 afvr rdi s1 "const char *" @ sym.imp.strcmp
