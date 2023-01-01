@@ -56,8 +56,8 @@ protected:
 	void fetchExtraArgsData(common::ObjectSequentialContainer &args, RzAnalysisFunction &r2fnc) const;
 
 private:
-	RzCore &_r2core;
-	static std::map<const std::string, const common::CallingConventionID> _r2rdcc;
+	RzCore &_rzcore;
+	static std::map<const std::string, const common::CallingConventionID> _rzrdcc;
 };
 
 class DecompilationError: public std::exception {
