@@ -1,3 +1,4 @@
+// SPDX-FileCopyrightText: 2022 Florian Märkl <info@florianmaerkl.de>
 // SPDX-FileCopyrightText: 2020 Avast Software
 // SPDX-License-Identifier: LGPL-3.0-only
 
@@ -311,17 +312,17 @@ void RizinDatabase::fetchFunctionLocalsAndArgs(Function &function, RzAnalysisFun
 			continue;
 
 		Storage variableStorage;
-		switch (locvar->kind) {
-		case RZ_ANALYSIS_VAR_KIND_REG: {
-			variableStorage = Storage::inRegister(locvar->regname);
-		}
-		break;
-		case RZ_ANALYSIS_VAR_KIND_SPV:
-		case RZ_ANALYSIS_VAR_KIND_BPV: {
-			int stackOffset = locvar->delta;
-			// Execute extra pop to match RetDec offset base.
-			// extra POP x86: 8 -> 4 (x64: 8 -> 0)
-			stackOffset -= fetchWordSize()/8;
+		switch (locvar->storage.type) {
+		case RZ_ANALYSIS_VAR_STORAGE_REG:
+			variableStorage = Storage::inRegister(locvar->storage.reg);
+			break;
+		case RZ_ANALYSIS_VAR_STORAGE_STACK: {
+			int stackOffset = locvar->storage.stack_off;
+			if (stackOffset > 0) {
+				// When below the stack frame (args), subtract the size of the
+				// return address to match retdec's address handling there.
+				stackOffset -= fetchWordSize() / 8;
+			}
 			variableStorage = Storage::onStack(stackOffset);
 		}
 		break;
@@ -334,7 +335,7 @@ void RizinDatabase::fetchFunctionLocalsAndArgs(Function &function, RzAnalysisFun
 		var.setRealName(locvar->name);
 
 		// If variable is argument it is a local variable too.
-		if (locvar->isarg)
+		if (rz_analysis_var_is_arg(locvar))
 			rzargs.push_back(var);
 
 		locals.insert(var);
@@ -344,7 +345,7 @@ void RizinDatabase::fetchFunctionLocalsAndArgs(Function &function, RzAnalysisFun
 
 	function.locals = locals;
 
-	// User spevcified arguments must have higher priority
+	// User specified arguments must have higher priority
 	function.parameters = rzuserArgs.empty() ? rzargs : rzuserArgs;
 }
 
