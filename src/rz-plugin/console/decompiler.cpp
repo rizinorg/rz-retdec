@@ -97,7 +97,7 @@ config::Config DecompilerConsole::createConsoleConfig(const RizinDatabase& binIn
 
 bool DecompilerConsole::registerCommands(RzCmd* cmd)
 {
-	RzCmdDesc* root_desc = rz_cmd_get_root(cmd);
+	RzCmdDesc* root_desc = rz_cmd_get_desc(cmd, "pd");
 	return DecompilerConsole::console.registerConsole(cmd, root_desc, CMD_PREFIX);
 }
 
