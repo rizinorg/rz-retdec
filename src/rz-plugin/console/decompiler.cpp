@@ -101,6 +101,12 @@ bool DecompilerConsole::registerCommands(RzCmd* cmd)
 	return DecompilerConsole::console.registerConsole(cmd, root_desc, CMD_PREFIX);
 }
 
+bool DecompilerConsole::deregisterCommands(RzCmd* cmd)
+{
+	RzCmdDesc* retdec_desc = rz_cmd_get_desc(cmd, CMD_PREFIX);
+	return rz_cmd_desc_remove(cmd, retdec_desc);
+}
+
 RzAnnotatedCode *DecompilerConsole::runDecompile(RzCore *core)
 {
 	std::lock_guard<std::recursive_mutex> lock(mutex);

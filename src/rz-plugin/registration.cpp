@@ -21,6 +21,11 @@ static bool rz_retdec_init(RzCore *core)
 	return DecompilerConsole::registerCommands(core->rcmd);
 }
 
+static bool rz_retdec_fini(RzCore *core)
+{
+	return DecompilerConsole::deregisterCommands(core->rcmd);
+}
+
 // Structure containing plugin info.
 RzCorePlugin rz_core_plugin_retdec = {
 	/* .name = */ "rz-retdec",
@@ -29,7 +34,7 @@ RzCorePlugin rz_core_plugin_retdec = {
 	/* .author = */ "RizinOrg and Avast",
 	/* .version = */ nullptr,
 	/* .init = */ rz_retdec_init,
-	/* .fini = */ nullptr
+	/* .fini = */ rz_retdec_fini,
 };
 
 #ifndef CORELIB
@@ -43,7 +48,6 @@ RZ_API RzLibStruct rizin_plugin = {
 	/* .data = */ &rz_core_plugin_retdec,
 	/* .version = */ RZ_VERSION,
 	/* .free = */ nullptr,
-	/* .pkgname */ "rz-retdec"
 };
 
 #endif

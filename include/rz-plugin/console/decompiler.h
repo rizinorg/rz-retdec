@@ -26,6 +26,9 @@ public:
 	/// Register all decompilation commands into the given RzCmd instance.
 	static bool registerCommands(RzCmd* cmd);
 
+	/// Deregister all decompilation commands into the given RzCmd instance.
+	static bool deregisterCommands(RzCmd* cmd);
+
 public:
 	/// Representation of pdz command.
 	static const Console::Command DecompileCurrent;
