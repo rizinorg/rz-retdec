@@ -120,7 +120,7 @@ RzAnnotatedCode* R2CGenerator::provideAnnotations(const rapidjson::Document &roo
 	}
 
 	std::string str = planecode.str();
-	code->code = reinterpret_cast<char *>(rz_malloc(str.length() + 1));
+	code->code = reinterpret_cast<char *>(rz_mem_alloc(str.length() + 1));
 	if(!code->code) {
 		rz_annotated_code_free(code);
 		throw DecompilationError("unable to allocate memory");
