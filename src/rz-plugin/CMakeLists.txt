@@ -1,5 +1,5 @@
 if (NOT BUILD_BUNDLED_RETDEC)
-	set(RETDEC_VERSION 4.0)
+	set(RETDEC_VERSION 5.0)
 	find_package(retdec ${RETDEC_VERSION} REQUIRED COMPONENTS retdec config)
 endif()
 
