@@ -4,7 +4,7 @@
 
 /**
  * @file
- * @brief Information gathering from R2 and user.
+ * @brief Information gathering from Rizin and user.
  */
 
 #include <retdec/utils/io/log.h>
@@ -20,7 +20,7 @@ using retdec::utils::io::Log;
 
 /**
  * Translation map between tokens representing calling convention type returned
- * by Radare2 and CallingConventionID that is recognized by RetDec.
+ * by Rizin and CallingConventionID that is recognized by RetDec.
  */
 std::map<const std::string, const CallingConventionID> RizinDatabase::_rzrdcc = {
 	{"arm32", CallingConventionID::CC_ARM},
@@ -49,7 +49,7 @@ RizinDatabase::RizinDatabase(RzCore &core):
 }
 
 /**
- * @brief Fetches path of the binary file from Radare2.
+ * @brief Fetches path of the binary file from Rizin.
  */
 std::string RizinDatabase::fetchFilePath() const
 {
@@ -157,27 +157,27 @@ Function RizinDatabase::fetchSeekedFunction() const
 }
 
 /**
- * @brief Fetches functions and global variables from Radare2.
+ * @brief Fetches functions and global variables from Rizin.
  */
-void RizinDatabase::fetchFunctionsAndGlobals(Config &rconfig) const
+void RizinDatabase::fetchFunctionsAndGlobals(Config &rzconfig) const
 {
 	auto list = rz_analysis_get_fcns(_rzcore.analysis);
 	if (list != nullptr) {
 		FunctionContainer functions;
-		for (RzListIter *it = list->head; it; it = it->n) {
-			auto fnc = reinterpret_cast<RzAnalysisFunction*>(it->data);
+		for (RzListIter *it = list->head; it; it = rz_list_iter_get_next(it)) {
+			auto fnc = reinterpret_cast<RzAnalysisFunction*>(rz_list_iter_get_data(it));
 			if (fnc == nullptr)
 				continue;
 			functions.insert(convertFunctionObject(*fnc));
 		}
 
-		rconfig.functions = functions;
+		rzconfig.functions = functions;
 	}
-	fetchGlobals(rconfig);
+	fetchGlobals(rzconfig);
 }
 
 /**
- * @brief Fetches global variables from the Radare2.
+ * @brief Fetches global variables from the Rizin.
  *
  * This method is intended only for internal usage. That is
  * why this method is private. To obtain functions and global
@@ -185,11 +185,13 @@ void RizinDatabase::fetchFunctionsAndGlobals(Config &rconfig) const
  * method is available.
  *
  * Reason for this is that currently the global variables are
- * not supported in Radare2 and fetching them requires sort
+ * not supported in Rizin and fetching them requires sort
  * of hack by looking into all available symbols and flags.
  * User may spacify symbol or provide flag on a specified address
  * and that could be treated as presence of global variable in
  * some cases.
+ *
+ * TODO: Just use the proper rz_analysis_global_*() API
  *
  * While browsing flags and symbols this method provides correction
  * of fetched functions as some of them might be dynamically linked.
@@ -202,12 +204,15 @@ void RizinDatabase::fetchGlobals(Config &config) const
 	if (obj == nullptr || obj->symbols == nullptr)
 		return;
 
-	auto list = obj->symbols;
-	GlobalVarContainer globals;
 
+	auto list = rz_analysis_var_global_get_all(_rzcore.analysis);
+
+	GlobalVarContainer globals;
 	FunctionContainer functions;
-	for (RzListIter *it = list->head; it; it = it->n) {
-		auto sym = reinterpret_cast<RzBinSymbol*>(it->data);
+
+	void **it;
+	rz_pvector_foreach(obj->symbols, it) {
+		auto sym = reinterpret_cast<RzBinSymbol*>(*it);
 		if (sym == nullptr)
 			continue;
 
@@ -236,24 +241,18 @@ void RizinDatabase::fetchGlobals(Config &config) const
 				//TODO: do we want to include these functions?
 			}
 		}
-		// Sometimes when setting flag, the type automatically is set to FUNC.
-		if (bind == "GLOBAL" && (type == "FUNC" || type == "OBJ")) {
-			if (config.functions.count(name) || config.functions.count("imp."+name)
-					|| sym->vaddr == 0 || sym->vaddr == UT64_MAX) {
-				// This is a function, not a global variable.
-				continue;
-			}
-			// Flags will contain custom name set by user.
-			RzFlagItem* flag = rz_flag_get_i(_rzcore.flags, sym->vaddr);
-			if (flag) {
-				name = flag->name;
-			}
+	}
 
-			Object var(name, Storage::inMemory(sym->vaddr));
-			var.setRealName(name);
+	// Searching through all globals
+	for (RzListIter *it = list->head; it; it = rz_list_iter_get_next(it)) {
+			auto glob = reinterpret_cast<RzAnalysisVarGlobal*>(rz_list_iter_get_data(it));
+			if (glob == nullptr)
+				continue;
+
+			Object var(glob->name, Storage::inMemory(glob->addr));
+			var.setRealName(glob->name);
 
 			globals.insert(var);
-		}
 	}
 
 	// If we found at least one dynamically linked function.
@@ -268,7 +267,7 @@ void RizinDatabase::fetchGlobals(Config &config) const
 }
 
 /**
- * Converts function object from its representation in Radare2 into
+ * Converts function object from its representation in Rizin into
  * represnetation that is used in RetDec.
  */
 Function RizinDatabase::convertFunctionObject(RzAnalysisFunction &rzfnc) const
@@ -363,8 +362,8 @@ void RizinDatabase::fetchExtraArgsData(ObjectSequentialContainer &args, RzAnalys
 	int nargs = rz_type_func_args_count(_rzcore.analysis->typedb, key);
 	if (nargs) {
 		RzList *list = rz_core_get_func_args(&_rzcore, rzfnc.name);
-		for (RzListIter *it = list->head; it; it = it->n) {
-			arg = reinterpret_cast<RzAnalysisFuncArg*>(it->data);
+		for (RzListIter *it = list->head; it; it = rz_list_iter_get_next(it)) {
+			arg = reinterpret_cast<RzAnalysisFuncArg*>(rz_list_iter_get_data(it));
 			Object var(arg->name, Storage::undefined());
 			var.setRealName(arg->name);
 			var.type = Type(fu::convertTypeToLlvm(_rzcore.analysis->typedb, arg->orig_c_type));
@@ -376,7 +375,7 @@ void RizinDatabase::fetchExtraArgsData(ObjectSequentialContainer &args, RzAnalys
 }
 
 /**
- * @brief Fetches the calling convention of the input function from Radare2.
+ * @brief Fetches the calling convention of the input function from Rizin.
  */
 void RizinDatabase::fetchFunctionCallingconvention(Function &function, RzAnalysisFunction &rzfnc) const
 {
@@ -391,7 +390,7 @@ void RizinDatabase::fetchFunctionCallingconvention(Function &function, RzAnalysi
 }
 
 /**
- * @brief Fetches the return type of the input function from Radare2.
+ * @brief Fetches the return type of the input function from Rizin.
  */
 void RizinDatabase::fetchFunctionReturnType(Function &function, RzAnalysisFunction &rzfnc) const
 {
