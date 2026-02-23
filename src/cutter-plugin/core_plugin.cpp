@@ -34,7 +34,8 @@ void RetDecPlugin::RetDec::decompileAt(RVA addr)
 	RzAnnotatedCode* code = nullptr;
 
 	try {
-		code = retdec::rzplugin::decompile(Core()->core(), addr);
+		auto core = Core()->lock();
+		code = retdec::rzplugin::decompile(core, addr);
 	}
 	catch (const std::exception& e) {
 		code = rz_annotated_code_new(strdup((
