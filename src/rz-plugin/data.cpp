@@ -164,8 +164,8 @@ void RizinDatabase::fetchFunctionsAndGlobals(Config &rzconfig) const
 	auto list = rz_analysis_function_list(_rzcore.analysis);
 	if (list != nullptr) {
 		FunctionContainer functions;
-		for (RzListIter *it = list->head; it; it = rz_list_iter_get_next(it)) {
-			auto fnc = reinterpret_cast<RzAnalysisFunction*>(rz_list_iter_get_data(it));
+		for (RzListIter *it = list->head; it; it = rz_list_next(it)) {
+			auto fnc = reinterpret_cast<RzAnalysisFunction*>(rz_list_val(it));
 			if (fnc == nullptr)
 				continue;
 			functions.insert(convertFunctionObject(*fnc));
@@ -235,8 +235,8 @@ void RizinDatabase::fetchGlobals(Config &config) const
 	}
 
 	// Searching through all globals
-	for (RzListIter *it = list->head; it; it = rz_list_iter_get_next(it)) {
-			auto glob = reinterpret_cast<RzAnalysisVarGlobal*>(rz_list_iter_get_data(it));
+	for (RzListIter *it = list->head; it; it = rz_list_next(it)) {
+			auto glob = reinterpret_cast<RzAnalysisVarGlobal*>(rz_list_val(it));
 			if (glob == nullptr)
 				continue;
 
@@ -353,8 +353,8 @@ void RizinDatabase::fetchExtraArgsData(ObjectSequentialContainer &args, RzAnalys
 	int nargs = rz_type_func_args_count(_rzcore.analysis->typedb, key);
 	if (nargs) {
 		RzList *list = rz_core_get_func_args(&_rzcore, rzfnc.name);
-		for (RzListIter *it = list->head; it; it = rz_list_iter_get_next(it)) {
-			arg = reinterpret_cast<RzAnalysisFuncArg*>(rz_list_iter_get_data(it));
+		for (RzListIter *it = list->head; it; it = rz_list_next(it)) {
+			arg = reinterpret_cast<RzAnalysisFuncArg*>(rz_list_val(it));
 			Object var(arg->name, Storage::undefined());
 			var.setRealName(arg->name);
 			var.type = Type(fu::convertTypeToLlvm(_rzcore.analysis->typedb, arg->orig_c_type));

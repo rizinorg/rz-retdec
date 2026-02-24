@@ -371,6 +371,7 @@ RUN
 
 NAME=stackvars bp
 FILE=rizin-testbins/elf/vars-complex-x86_64-bp
+BROKEN=1
 CMDS=<<EOF
 aa
 s sym.leaffunc

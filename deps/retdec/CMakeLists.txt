@@ -8,7 +8,7 @@ else()
 
 	FetchContent_Declare(retdec
 		GIT_REPOSITORY https://github.com/avast/retdec
-		GIT_TAG 53e55b4b26e9b843787f0e06d867441e32b1604e # v5
+		GIT_TAG 8be53bbd3d2cd0f550c0e98d3b31d9ee1366f304
 		PATCH_COMMAND ${CMAKE_COMMAND} -Dretdec_path=<SOURCE_DIR> -P ${CMAKE_CURRENT_SOURCE_DIR}/patch.cmake
 	)
 
