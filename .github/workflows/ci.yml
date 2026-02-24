@@ -43,8 +43,5 @@ jobs:
       - name: cat err.log
         if: ${{ failure() }}
         run: cat /home/runner/work/rz-retdec/rz-retdec/build/_deps/retdec-build/external/src/yaramod-project-stamp/yaramod-project-build-err.log
-      - name: cat out.log
-        if: ${{ failure() }}
-        run: cat /home/runner/work/rz-retdec/rz-retdec/build/_deps/retdec-build/external/src/yaramod-project-stamp/yaramod-project-build-out.log
       - name: Run tests
         run: make -C test
