@@ -36,7 +36,7 @@ jobs:
           sudo ninja -C build install
       - name: Build rz-retdec
         run: |
-          cmake -Bbuild -DCMAKE_INSTALL_PREFIX=$HOME/.local -DBUILD_CUTTER_PLUGIN=ON -DYARAMOD_URL="https://github.com/avast/yaramod/archive/refs/tags/v4.6.0.zip" -DYARAMOD_ARCHIVE_SHA256=cb43798e8d56d63a1c06ee2ac7af100e50f7be8d5f2785f26edb01c1704a44b5
+          cmake -Bbuild -DCMAKE_INSTALL_PREFIX=$HOME/.local -DBUILD_CUTTER_PLUGIN=ON
           cd build
           make -j $(nproc)
           make install
