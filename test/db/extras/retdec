@@ -123,7 +123,7 @@ EXPECT=<<EOF
 
 // ------------------- Function Prototypes --------------------
 
-void Aeropause(int32_t a1, char ** argv);
+void Aeropause(int32_t argc, char ** argv);
 void PrintAmbassador(int64_t a1);
 
 // --------------------- Global Variables ---------------------
@@ -134,24 +134,25 @@ int32_t g2;
 // ------------------------ Functions -------------------------
 
 // Address range: 0x80492de - 0x804945c
-void Aeropause(int32_t a1, char ** argv) {
-    char ** v1 = (char **)a1;
-    *(int32_t *)a1 = malloc(8);
-    *(int32_t *)*v1 = (int32_t)argv;
-    char * v2 = *v1; // 0x8049310
+void Aeropause(int32_t argc, char ** argv) {
+    int32_t mem = malloc(8); // 0x80492e9
+    int32_t * v1 = (int32_t *)argc; // 0x80492f6
+    *v1 = mem;
+    *(int32_t *)mem = (int32_t)argv;
+    int32_t v2 = *v1; // 0x8049310
     int32_t * v3; // 0x80492de
     if (*(int32_t *)v2 < 2) {
-        int32_t * v4 = (int32_t *)(a1 + 8);
+        int32_t * v4 = (int32_t *)(argc + 8);
         *v4 = 0;
         v3 = v4;
     } else {
-        int32_t str = *(int32_t *)(*(int32_t *)((int32_t)v2 + 4) + 4); // 0x8049330
-        int32_t * str2 = (int32_t *)(a1 + 4); // 0x8049336
+        int32_t str = *(int32_t *)(*(int32_t *)(v2 + 4) + 4); // 0x8049330
+        int32_t * str2 = (int32_t *)(argc + 4); // 0x8049336
         *str2 = str;
         if (strcmp(str, "the  ") != 0) {
             // 0x8049360
             if (strcmp(*str2, "dark") != 0) {
-                int32_t * v5 = (int32_t *)(a1 + 8);
+                int32_t * v5 = (int32_t *)(argc + 8);
                 if (strcmp(*str2, "third") != 0) {
                     // 0x80493ae
                     *v5 = 0xf4240;
@@ -162,12 +163,12 @@ void Aeropause(int32_t a1, char ** argv) {
                     v3 = v5;
                 }
             } else {
-                int32_t * v6 = (int32_t *)(a1 + 8);
+                int32_t * v6 = (int32_t *)(argc + 8);
                 *v6 = 2;
                 v3 = v6;
             }
         } else {
-            int32_t * v7 = (int32_t *)(a1 + 8);
+            int32_t * v7 = (int32_t *)(argc + 8);
             *v7 = 1;
             v3 = v7;
         }
@@ -175,10 +176,10 @@ void Aeropause(int32_t a1, char ** argv) {
     // 0x80493b8
     int32_t v8; // bp-12, 0x80492de
     int32_t v9 = &v8; // 0x80492ee
-    g1 = a1;
+    g1 = argc;
     uint32_t v10 = *v3; // 0x80493bb
     if (v10 < 5) {
-        switch (a1) {
+        switch (argc) {
             case 0: {
                 // 0x80493da
                 *(int32_t *)(v9 - 16) = (int32_t)"pure";
@@ -371,7 +372,6 @@ RUN
 
 NAME=stackvars bp
 FILE=rizin-testbins/elf/vars-complex-x86_64-bp
-BROKEN=1
 CMDS=<<EOF
 aa
 s sym.leaffunc

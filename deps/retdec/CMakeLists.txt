@@ -7,8 +7,8 @@ else()
 	include(FetchContent)
 
 	FetchContent_Declare(retdec
-		GIT_REPOSITORY https://github.com/avast/retdec
-		GIT_TAG 8be53bbd3d2cd0f550c0e98d3b31d9ee1366f304
+		GIT_REPOSITORY https://github.com/kazarmy/retdec
+		GIT_TAG 8272d0355794f8b8a63d8611b1dea50b4f2d87c3 # get-config-stack-var-after-simplify 
 		PATCH_COMMAND ${CMAKE_COMMAND} -Dretdec_path=<SOURCE_DIR> -P ${CMAKE_CURRENT_SOURCE_DIR}/patch.cmake
 	)
 
