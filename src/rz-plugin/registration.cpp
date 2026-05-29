@@ -16,12 +16,12 @@
 using namespace retdec::rzplugin;
 using namespace retdec::utils::io;
 
-static bool rz_retdec_init(RzCore *core)
+static bool rz_retdec_init(RzCore *core, void **)
 {
 	return DecompilerConsole::registerCommands(core->rcmd);
 }
 
-static bool rz_retdec_fini(RzCore *core)
+static bool rz_retdec_fini(RzCore *core, void *)
 {
 	return DecompilerConsole::deregisterCommands(core->rcmd);
 }

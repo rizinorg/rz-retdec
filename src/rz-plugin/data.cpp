@@ -321,7 +321,7 @@ void RizinDatabase::fetchFunctionLocalsAndArgs(Function &function, RzAnalysisFun
 		};
 
 		Object var(locvar->name, variableStorage);
-		var.type = Type(fu::convertTypeToLlvm(_rzcore.analysis->typedb, locvar->type));
+		var.type = Type(fu::convertTypeToLlvm(rz_analysis_get_type_db(_rzcore.analysis), locvar->type));
 		var.setRealName(locvar->name);
 
 		// If variable is argument it is a local variable too.
@@ -346,18 +346,19 @@ void RizinDatabase::fetchExtraArgsData(ObjectSequentialContainer &args, RzAnalys
 {
 	RzAnalysisFuncArg *arg;
 
-	char* key = resolve_fcn_name(_rzcore.analysis, rzfnc.name);
-	if (!key || !_rzcore.analysis || !_rzcore.analysis->typedb)
+	char* key = rz_analysis_function_name_resolve(_rzcore.analysis, rzfnc.name);
+	auto typedb = rz_analysis_get_type_db(_rzcore.analysis);
+	if (!key || !_rzcore.analysis || !typedb)
 		return;
 
-	int nargs = rz_type_func_args_count(_rzcore.analysis->typedb, key);
+	int nargs = rz_type_func_args_count(typedb, key);
 	if (nargs) {
 		RzList *list = rz_core_get_func_args(&_rzcore, rzfnc.name);
 		for (RzListIter *it = list->head; it; it = rz_list_next(it)) {
 			arg = reinterpret_cast<RzAnalysisFuncArg*>(rz_list_val(it));
 			Object var(arg->name, Storage::undefined());
 			var.setRealName(arg->name);
-			var.type = Type(fu::convertTypeToLlvm(_rzcore.analysis->typedb, arg->orig_c_type));
+			var.type = Type(fu::convertTypeToLlvm(typedb, arg->orig_c_type));
 			args.push_back(var);
 		}
 		rz_list_free (list);
@@ -386,13 +387,14 @@ void RizinDatabase::fetchFunctionCallingconvention(Function &function, RzAnalysi
 void RizinDatabase::fetchFunctionReturnType(Function &function, RzAnalysisFunction &rzfnc) const
 {
 	function.returnType = Type("void");
-	char* key = resolve_fcn_name(_rzcore.analysis, rzfnc.name);
+	char* key = rz_analysis_function_name_resolve(_rzcore.analysis, rzfnc.name);
+	auto typedb = rz_analysis_get_type_db(_rzcore.analysis);
 
-	if (!key || !_rzcore.analysis || !_rzcore.analysis->typedb)
+	if (!key || !_rzcore.analysis || !typedb)
 		return;
 
-	if (auto returnType = rz_type_func_ret(_rzcore.analysis->typedb, key))
-		function.returnType = Type(fu::convertTypeToLlvm(_rzcore.analysis->typedb, returnType));
+	if (auto returnType = rz_type_func_ret(typedb, key))
+		function.returnType = Type(fu::convertTypeToLlvm(typedb, returnType));
 
 	rz_mem_free(key);
 }
