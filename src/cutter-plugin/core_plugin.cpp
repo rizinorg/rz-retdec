@@ -10,6 +10,7 @@
 
 #include "cutter-plugin/core_plugin.h"
 #include "rz-plugin/rzretdec.h"
+#include <Cutter.h>
 
 void RetDecPlugin::setupPlugin()
 {
